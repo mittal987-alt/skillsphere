@@ -56,6 +56,15 @@ const freelancerSchema = new mongoose.Schema(
         type:Boolean,
         default:false
     },
+    averageRating: {
+    type: Number,
+    default: 0,
+},
+
+totalReviews: {
+    type: Number,
+    default: 0,
+},
     portfolio:[
 {
     title:String,

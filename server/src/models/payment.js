@@ -1,0 +1,66 @@
+import mongoose from "mongoose";
+
+const paymentSchema = new mongoose.Schema(
+{
+    gig:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Gig",
+        required:true
+    },
+
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Client",
+        required: true,
+    },
+
+    freelancer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Freelancer",
+        required: true,
+    },
+
+    proposal:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Proposal",
+        required:true
+    },
+
+    amount:{
+        type:Number,
+        required:true
+    },
+
+    currency:{
+        type:String,
+        default:"INR"
+    },
+
+    paymentMethod:{
+        type:String,
+        default:"Razorpay"
+    },
+
+    razorpayOrderId:String,
+
+    razorpayPaymentId:String,
+
+    razorpaySignature:String,
+
+    status:{
+        type:String,
+        enum:[
+            "Pending",
+            "Paid",
+            "Failed",
+            "Refunded"
+        ],
+        default:"Pending"
+    }
+
+},
+{
+    timestamps:true
+});
+
+export default mongoose.model("Payment",paymentSchema);

@@ -2,7 +2,9 @@ import Proposal from "../models/Proposal.js";
 import Freelancer from "../models/Freelancer.js";
 import Gig from "../models/Gig.js";
 import Client from "../models/client.js";
-
+import Conversation from "../models/Conversation.js";
+import createNotification from "../utils/createNotification.js";
+import createNotification from "../utils/createNotification.js";
 // @desc Submit Proposal
 // @route POST /api/proposals
 // @access Private (Freelancer)
@@ -50,12 +52,28 @@ export const submitProposal = async (req, res) => {
     }
 
     const proposal = await Proposal.create({
-      gig: gigId,
-      freelancer: freelancer._id,
-      coverLetter,
-      bidAmount,
-      estimatedDays,
-    });
+  gig: gigId,
+  freelancer: freelancer._id,
+  coverLetter,
+  bidAmount,
+  estimatedDays,
+});
+
+const client = await Client.findById(gig.client).populate("user");
+
+await createNotification(
+  client.user._id,
+  "New Proposal",
+  `${req.user.name} submitted a proposal for "${gig.title}".`,
+  "Proposal",
+  `/client/gigs/${gig._id}`
+);
+
+res.status(201).json({
+    success:true,
+    message:"Proposal submitted successfully",
+    proposal,
+});
 
     res.status(201).json({
       success: true,
@@ -183,6 +201,35 @@ export const acceptProposal = async (req, res) => {
 
     proposal.status = "Accepted";
     await proposal.save();
+    const freelancer = await Freelancer.findById(
+  proposal.freelancer
+).populate("user");
+
+await createNotification(
+  freelancer.user._id,
+  "Proposal Accepted",
+  `Congratulations! Your proposal for "${proposal.gig.title}" has been accepted.`,
+  "Proposal",
+  "/freelancer/proposals"
+);
+
+// Create chat conversation automatically
+await Conversation.findOneAndUpdate(
+  {
+    gig: proposal.gig._id,
+    client: client.user,
+    freelancer: freelancer.user._id,
+  },
+  {
+    gig: proposal.gig._id,
+    client: client.user,
+    freelancer: freelancer.user._id,
+  },
+  {
+    upsert: true,
+    new: true,
+  }
+);
 
     await Gig.findByIdAndUpdate(proposal.gig._id, {
       status: "In Progress",
@@ -221,7 +268,7 @@ export const rejectProposal = async (req, res) => {
 
   try {
 
-    const proposal = await Proposal.findById(req.params.id);
+   const proposal = await Proposal.findById(req.params.id).populate("gig");
 
     if (!proposal) {
       return res.status(404).json({
@@ -233,6 +280,17 @@ export const rejectProposal = async (req, res) => {
     proposal.status = "Rejected";
 
     await proposal.save();
+    const freelancer = await Freelancer.findById(
+  proposal.freelancer
+).populate("user");
+
+await createNotification(
+  freelancer.user._id,
+  "Proposal Rejected",
+  `Your proposal for "${proposal.gig.title}" was rejected.`,
+  "Proposal",
+  "/freelancer/proposals"
+);
 
     res.status(200).json({
       success: true,
@@ -282,6 +340,17 @@ export const withdrawProposal = async (req, res) => {
         message: "Accepted proposal cannot be withdrawn",
       });
     }
+    const gig = await Gig.findById(proposal.gig);
+
+const client = await Client.findById(gig.client).populate("user");
+
+await createNotification(
+  client.user._id,
+  "Proposal Withdrawn",
+  "A freelancer has withdrawn their proposal.",
+  "Proposal",
+  `/client/gigs/${gig._id}`
+);
 
     await proposal.deleteOne();
 
