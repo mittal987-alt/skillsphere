@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "cloudinary": "^1.41.3",
     "crypto": "^1.0.1",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0",
     "razorpay": "^2.9.6"
   }
 }
