@@ -1,8 +1,11 @@
 import Review from "../models/Review.js";
-import Client from "../models/Client.js";
+import Client from "../models/client.js";
 import Freelancer from "../models/Freelancer.js";
 import Gig from "../models/Gig.js";
+import Proposal from "../models/Proposal.js";
 import createNotification from "../utils/createNotification.js";
+import reviewEmail from "../../templates/reviewEmail.js";
+import { sendEmail } from "../services/email.service.js";
 
 // ============================================
 // Create Review
@@ -91,6 +94,13 @@ export const createReview = async (req, res) => {
       "/freelancer/reviews"
     );
 
+  
+
+await sendEmail({
+  to: freelancer.user.email,
+  subject: "New Review",
+  html: reviewEmail(rating),
+});
     res.status(201).json({
       success: true,
       message: "Review submitted successfully",

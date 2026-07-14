@@ -30,6 +30,7 @@ import ChatPage from './pages/chat/ChatPage';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminGigs from './pages/admin/AdminGigs';
 
@@ -66,6 +67,7 @@ export default function AppRoutes() {
 
       {/* Admin Routes */}
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><AnalyticsDashboard /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/gigs" element={<ProtectedRoute allowedRoles={['admin']}><AdminGigs /></ProtectedRoute>} />
 

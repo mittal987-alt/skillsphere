@@ -1,5 +1,9 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import {sendEmail} from "../services/email.service.js";
+import welcomeEmail from "../../templates/welcomeEmail.js";
+
+
 
 // @desc Register User
 // @route POST /api/auth/register
@@ -34,6 +38,15 @@ export const registerUser = async (req, res) => {
       role,
     });
 
+    try {
+  await sendEmail({
+    to: user.email,
+    subject: "Welcome to SkillSphere 🎉",
+    html: welcomeEmail(user.name),
+  });
+} catch (err) {
+  console.error("Email Error:", err.message);
+}
     // Generate Token
     const token = generateToken(user._id, user.role);
 

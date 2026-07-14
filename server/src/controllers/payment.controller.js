@@ -5,14 +5,10 @@ import Payment from "../models/payment.js";
 import Proposal from "../models/Proposal.js";
 import Gig from "../models/Gig.js";
 import Razorpay from "razorpay";
+import { sendEmail } from "../services/email.service.js";
+import paymentEmail from "../../templates/paymentEmail.js";
 import crypto from "crypto";
 
-import Client from "../models/Client.js";
-import Freelancer from "../models/Freelancer.js";
-
-import Payment from "../models/Payment.js";
-import Proposal from "../models/Proposal.js";
-import Gig from "../models/Gig.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -119,6 +115,16 @@ export const verifyPayment = async (req, res) => {
     payment.status = "Paid";
 
     await payment.save();
+  
+
+const freelancer = await Freelancer.findById(payment.freelancer)
+  .populate("user");
+
+await sendEmail({
+  to: freelancer.user.email,
+  subject: "Payment Received",
+  html: paymentEmail(payment.amount),
+});
 
     await Gig.findByIdAndUpdate(payment.gig, {
       status: "In Progress",
@@ -136,8 +142,6 @@ export const verifyPayment = async (req, res) => {
     });
   }
 };
-
-
 export const getMyPayments = async (req, res) => {
   try {
     const client = await Client.findOne({

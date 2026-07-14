@@ -4,7 +4,9 @@ import Gig from "../models/Gig.js";
 import Client from "../models/client.js";
 import Conversation from "../models/Conversation.js";
 import createNotification from "../utils/createNotification.js";
-import createNotification from "../utils/createNotification.js";
+import { sendEmail } from "../services/email.service.js";
+import proposalEmail from "../../templates/proposalEmail.js";
+
 // @desc Submit Proposal
 // @route POST /api/proposals
 // @access Private (Freelancer)
@@ -68,6 +70,11 @@ await createNotification(
   "Proposal",
   `/client/gigs/${gig._id}`
 );
+await sendEmail({
+  to: client.user.email,
+  subject: "New Proposal Received",
+  html: proposalEmail(gig.title),
+});
 
 res.status(201).json({
     success:true,
@@ -351,6 +358,15 @@ await createNotification(
   "Proposal",
   `/client/gigs/${gig._id}`
 );
+await sendEmail({
+
+to:client.user.email,
+
+subject:"New Proposal",
+
+html:proposalEmail(gig.title)
+
+});
 
     await proposal.deleteOne();
 

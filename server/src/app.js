@@ -11,6 +11,11 @@ import notificationRoutes from "./routes/notification.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import searchRoutes from "./routes/search.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
+import cloudinaryRoutes from "./routes/cloudinary.routes.js";
+import messageRoutes from "./routes/message.routes.js";
 
 const app = express();
 
@@ -31,5 +36,10 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/upload", cloudinaryRoutes);
+app.use("/api/messages", messageRoutes);
 
 export default app;
