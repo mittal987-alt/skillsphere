@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { type RootState, type AppDispatch } from '../redux/store';
 import { setCredentials, logout } from '../redux/slices/authSlice';
 import { authApi } from '../api/auth';
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../redux/store';
+import { type RootState, type AppDispatch } from '../../redux/store';
 import { notificationsApi } from '../../api/notifications';
 import { setNotifications, markRead, markAllRead, removeNotification } from '../../redux/slices/notificationSlice';
 

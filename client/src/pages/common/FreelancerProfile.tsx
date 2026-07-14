@@ -4,7 +4,7 @@ import { freelancerApi } from '../../api/freelancer';
 import { reviewsApi } from '../../api/reviews';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
-import { FreelancerProfile as IFreelancerProfile, Review } from '../../types';
+import { type FreelancerProfile as IFreelancerProfile, type Review } from '../../types';
 
 export default function FreelancerProfile() {
   const { id } = useParams<{ id: string }>();

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { paymentsApi } from '../../api/payments';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Payment } from '../../types';
+import { type Payment } from '../../types';
 
 export default function FreelancerEarnings() {
   const { data: payments, isLoading } = useQuery({

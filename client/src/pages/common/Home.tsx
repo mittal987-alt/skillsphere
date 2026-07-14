@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { gigsApi } from '../../api/gigs';
 import GigCard from '../../components/common/GigCard';
-import { Gig } from '../../types';
+import { type Gig } from '../../types';
 
 const categories = [
   { label: 'Design', icon: '🎨', color: '#ec4899' },

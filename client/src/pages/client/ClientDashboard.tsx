@@ -4,7 +4,7 @@ import { gigsApi } from '../../api/gigs';
 import { proposalsApi } from '../../api/proposals';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Gig, Proposal } from '../../types';
+import { type Gig,type Proposal } from '../../types';
 
 export default function ClientDashboard() {
   const { user } = useAuth();

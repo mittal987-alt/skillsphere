@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../api/admin';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { User } from '../../types';
+import { type User } from '../../types';
 
 export default function AdminUsers() {
   const qc = useQueryClient();

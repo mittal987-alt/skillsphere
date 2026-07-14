@@ -4,7 +4,7 @@ import { chatApi } from '../../api/chat';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Conversation, Message } from '../../types';
+import {type Conversation,type Message } from '../../types';
 
 export default function ChatPage() {
   const { user } = useAuth();

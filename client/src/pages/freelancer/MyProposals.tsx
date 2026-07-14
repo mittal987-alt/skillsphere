@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { proposalsApi } from '../../api/proposals';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Proposal } from '../../types';
+import { type Proposal } from '../../types';
 
 export default function MyProposals() {
   const qc = useQueryClient();

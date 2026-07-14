@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthState } from '../../types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { User, AuthState } from '../../types';
 
 const storedUser = localStorage.getItem('ss_user');
 const storedToken = localStorage.getItem('ss_token');

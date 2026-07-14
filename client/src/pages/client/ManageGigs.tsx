@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { gigsApi } from '../../api/gigs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Gig } from '../../types';
+import { type Gig } from '../../types';
 
 export default function ManageGigs() {
   const qc = useQueryClient();

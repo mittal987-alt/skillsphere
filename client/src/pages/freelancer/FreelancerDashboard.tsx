@@ -4,7 +4,7 @@ import { freelancerApi } from '../../api/freelancer';
 import { proposalsApi } from '../../api/proposals';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { FreelancerProfile, Proposal } from '../../types';
+import { type FreelancerProfile,type  Proposal } from '../../types';
 
 export default function FreelancerDashboard() {
   const { user } = useAuth();

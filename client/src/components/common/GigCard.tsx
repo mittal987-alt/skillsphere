@@ -1,4 +1,4 @@
-import { Gig } from '../../types';
+import  { type Gig } from '../../types';
 import { Link } from 'react-router-dom';
 
 interface GigCardProps {

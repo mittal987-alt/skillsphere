@@ -4,7 +4,7 @@ import { proposalsApi } from '../../api/proposals';
 import { gigsApi } from '../../api/gigs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
-import { Proposal } from '../../types';
+import {type Proposal } from '../../types';
 
 export default function GigProposals() {
   const { id } = useParams<{ id: string }>();

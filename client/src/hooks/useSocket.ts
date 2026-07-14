@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { type RootState } from '../redux/store';
 
 export const useSocket = () => {
   const socketRef = useRef<Socket | null>(null);

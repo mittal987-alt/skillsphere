@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../../api/admin';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { AdminDashboard as AdminStats } from '../../types';
+import { type AdminDashboard as AdminStats } from '../../types';
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery({

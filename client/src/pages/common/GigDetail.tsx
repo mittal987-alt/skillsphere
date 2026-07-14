@@ -8,7 +8,7 @@ import { reviewsApi } from '../../api/reviews';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
-import { Review } from '../../types';
+import { type Review } from '../../types';
 
 interface ProposalForm {
   coverLetter: string;

@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { gigsApi } from '../../api/gigs';
 import GigCard from '../../components/common/GigCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { Gig } from '../../types';
+import { type Gig } from '../../types';
 
 const CATEGORIES = ['', 'Design', 'Development', 'Writing', 'Marketing', 'Video', 'Data', 'Finance', 'Other'];
 const EXP_LEVELS = ['', 'Beginner', 'Intermediate', 'Expert'];
