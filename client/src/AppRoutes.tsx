@@ -10,6 +10,8 @@ import Home from './pages/common/Home';
 import GigBrowse from './pages/common/GigBrowse';
 import GigDetail from './pages/common/GigDetail';
 import FreelancerProfile from './pages/common/FreelancerProfile';
+import ForgotPassword from "./pages/auth/ForgetPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Client Pages
 import ClientDashboard from './pages/client/ClientDashboard';
@@ -50,9 +52,13 @@ export default function AppRoutes() {
 
       {/* Shared Protected */}
       <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+      <Route
+        path="/reset-password/:token"
+        element={<ResetPassword />}
+      />  
 
       {/* Client Routes */}
-      <Route path="/client/dashboard" element={<ProtectedRoute allowedRoles={['client']}><ClientDashboard /></ProtectedRoute>} />
+      <Route path="/client/dashboard" element={<ClientDashboard />} />
       <Route path="/client/gigs" element={<ProtectedRoute allowedRoles={['client']}><ManageGigs /></ProtectedRoute>} />
       <Route path="/client/gigs/new" element={<ProtectedRoute allowedRoles={['client']}><PostGig /></ProtectedRoute>} />
       <Route path="/client/gigs/:id/edit" element={<ProtectedRoute allowedRoles={['client']}><EditGig /></ProtectedRoute>} />
@@ -64,6 +70,10 @@ export default function AppRoutes() {
       <Route path="/freelancer/profile" element={<ProtectedRoute allowedRoles={['freelancer']}><MyProfile /></ProtectedRoute>} />
       <Route path="/freelancer/proposals" element={<ProtectedRoute allowedRoles={['freelancer']}><MyProposals /></ProtectedRoute>} />
       <Route path="/freelancer/earnings" element={<ProtectedRoute allowedRoles={['freelancer']}><FreelancerEarnings /></ProtectedRoute>} />
+      <Route
+    path="/forgot-password"
+    element={<ForgotPassword />}
+/>
 
       {/* Admin Routes */}
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />

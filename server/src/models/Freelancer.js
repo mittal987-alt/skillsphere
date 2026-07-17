@@ -9,10 +9,10 @@ const freelancerSchema = new mongoose.Schema(
         unique:true
     },
 
-    title:{
-        type:String,
-        required:true
-    },
+    title: {
+    type: String,
+    default: "",
+},
 
     bio:{
         type:String,

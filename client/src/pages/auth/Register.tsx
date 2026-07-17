@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
 
 interface RegisterForm {
   name: string;
@@ -23,9 +24,9 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      const res = await registerUser({ name: data.name, email: data.email, password: data.password, role: data.role });
-      if (res.user.role === 'client') navigate('/client/dashboard');
-      else navigate('/freelancer/dashboard');
+      await registerUser({ name: data.name, email: data.email, password: data.password, role: data.role });
+      toast.success("Registration Successful");
+      navigate("/login");
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
       setError(axErr.response?.data?.message || 'Registration failed.');
@@ -45,8 +46,8 @@ export default function Register() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.5rem', fontWeight: 800, color: 'white',
             }}>S</div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em', margin: 0 }}>Join SkillSphere</h1>
-            <p style={{ color: '#475569', marginTop: '0.5rem', fontSize: '0.9rem' }}>Start your journey today</p>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', margin: 0 }}>Join SkillSphere</h1>
+            <p style={{ color: 'var(--color-text-faint)', marginTop: '0.5rem', fontSize: '0.9rem' }}>Start your journey today</p>
           </Link>
         </div>
 
@@ -66,14 +67,14 @@ export default function Register() {
                   <label key={role} style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
                     padding: '1rem', borderRadius: 12,
-                    border: `2px solid ${selectedRole === role ? '#6366f1' : 'rgba(255,255,255,0.1)'}`,
-                    background: selectedRole === role ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)',
+                    border: `2px solid ${selectedRole === role ? '#6366f1' : 'var(--color-border)'}`,
+                    background: selectedRole === role ? 'rgba(99,102,241,0.1)' : 'var(--color-surface)',
                     cursor: 'pointer', transition: 'all 0.2s',
                   }}>
                     <input type="radio" value={role} {...register('role')} style={{ display: 'none' }} />
                     <span style={{ fontSize: '1.5rem' }}>{role === 'client' ? '🏢' : '💼'}</span>
-                    <span style={{ fontWeight: 700, color: selectedRole === role ? '#a78bfa' : '#94a3b8', textTransform: 'capitalize', fontSize: '0.9rem' }}>{role}</span>
-                    <span style={{ fontSize: '0.72rem', color: '#475569', textAlign: 'center' }}>
+                    <span style={{ fontWeight: 700, color: selectedRole === role ? '#a78bfa' : 'var(--color-text-muted)', textTransform: 'capitalize', fontSize: '0.9rem' }}>{role}</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)', textAlign: 'center' }}>
                       {role === 'client' ? 'Post gigs & hire' : 'Find work & earn'}
                     </span>
                   </label>
@@ -145,7 +146,7 @@ export default function Register() {
 
           <hr className="divider" />
 
-          <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.875rem' }}>
+          <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', fontSize: '0.875rem' }}>
             Already have an account?{' '}
             <Link to="/login" style={{ color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
           </p>

@@ -43,8 +43,8 @@ export default function Login() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.5rem', fontWeight: 800, color: 'white',
             }}>S</div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em', margin: 0 }}>Welcome back</h1>
-            <p style={{ color: '#475569', marginTop: '0.5rem', fontSize: '0.9rem' }}>Sign in to SkillSphere</p>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', margin: 0 }}>Welcome back</h1>
+            <p style={{ color: 'var(--color-text-faint)', marginTop: '0.5rem', fontSize: '0.9rem' }}>Sign in to SkillSphere</p>
           </Link>
         </div>
 
@@ -79,6 +79,22 @@ export default function Login() {
               />
               {errors.password && <span className="error-text">{errors.password.message}</span>}
             </div>
+            <div
+                style={{
+                    textAlign: "right",
+                    marginBottom: 20
+                }}
+            >
+                <Link
+                    to="/forgot-password"
+                    style={{
+                        color: "#6366f1",
+                        fontWeight: 600
+                    }}
+                >
+                    Forgot Password?
+                </Link>
+            </div>
 
             <button
               type="submit"
@@ -93,7 +109,7 @@ export default function Login() {
 
           <hr className="divider" />
 
-          <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.875rem' }}>
+          <p style={{ textAlign: 'center', color: 'var(--color-text-faint)', fontSize: '0.875rem' }}>
             Don't have an account?{' '}
             <Link to="/register" style={{ color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>Create one</Link>
           </p>

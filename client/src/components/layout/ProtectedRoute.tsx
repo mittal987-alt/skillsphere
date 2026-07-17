@@ -1,27 +1,41 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import type { ReactNode } from "react";
 
 interface ProtectedRouteProps {
+  children: ReactNode;
   allowedRoles?: string[];
 }
 
-const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAuth();
+export default function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
+  const { isAuthenticated, user, loading } = useAuth();
 
+  // Show loader while auth is being initialized
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Redirect if not logged in
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect if role is not allowed
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    // Redirect to the appropriate dashboard
-    const redirect =
-      user.role === 'client' ? '/client/dashboard' :
-      user.role === 'freelancer' ? '/freelancer/dashboard' :
-      '/admin/dashboard';
-    return <Navigate to={redirect} replace />;
+    switch (user.role) {
+      case "client":
+        return <Navigate to="/client/dashboard" replace />;
+      case "freelancer":
+        return <Navigate to="/freelancer/dashboard" replace />;
+      case "admin":
+        return <Navigate to="/admin/dashboard" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
   }
 
-  return <Outlet />;
-};
-
-export default ProtectedRoute;
+  return <>{children}</>;
+}

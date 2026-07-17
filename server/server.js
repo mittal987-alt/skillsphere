@@ -1,8 +1,9 @@
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config";
 
-import app from "./src/app.js";
+import app from "./app.js";
 import connectDB from "./src/config/db.js";
+
+console.log(process.env.RAZORPAY_KEY_ID);
 
 connectDB();
 

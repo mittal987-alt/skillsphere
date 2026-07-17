@@ -13,7 +13,7 @@ export default function FreelancerProfile() {
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ['freelancer', id],
     queryFn: () => freelancerApi.getById(id!),
-    select: r => r.data.freelancer as IFreelancerProfile,
+    select: r => r.data.data as IFreelancerProfile,
     enabled: !!id,
   });
 

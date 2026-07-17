@@ -39,7 +39,7 @@ export default function Home() {
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
           padding: '0.375rem 1rem', borderRadius: 999, marginBottom: '2rem',
           background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)',
-          fontSize: '0.8rem', fontWeight: 600, color: '#a78bfa',
+          fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-accent)',
         }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
           Platform is live — 10,000+ freelancers ready
@@ -50,7 +50,7 @@ export default function Home() {
           fontWeight: 900,
           letterSpacing: '-0.04em',
           lineHeight: 1.1,
-          color: '#f1f5f9',
+          color: 'var(--color-text)',
           margin: '0 0 1.5rem',
         }}>
           Find the perfect{' '}
@@ -60,7 +60,7 @@ export default function Home() {
           for any job
         </h1>
 
-        <p style={{ fontSize: '1.15rem', color: '#94a3b8', lineHeight: 1.7, margin: '0 0 2.5rem' }}>
+        <p style={{ fontSize: '1.15rem', color: 'var(--color-text-muted)', lineHeight: 1.7, margin: '0 0 2.5rem' }}>
           SkillSphere connects talented freelancers with clients who need expert help.
           Post your gig, review proposals, and get things done.
         </p>
@@ -81,7 +81,7 @@ export default function Home() {
               <div style={{ fontSize: '2rem', fontWeight: 900, background: 'linear-gradient(135deg,#6366f1,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.02em' }}>
                 {s.value}
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: 4 }}>{s.label}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-faint)', marginTop: 4 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -90,16 +90,16 @@ export default function Home() {
       {/* Categories */}
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '3rem 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em', margin: '0 0 0.5rem' }}>Browse by Category</h2>
-          <p style={{ color: '#475569', fontSize: '0.95rem' }}>Find experts in every field</p>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', margin: '0 0 0.5rem' }}>Browse by Category</h2>
+          <p style={{ color: 'var(--color-text-faint)', fontSize: '0.95rem' }}>Find experts in every field</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
           {categories.map(cat => (
             <Link key={cat.label} to={`/gigs?category=${cat.label}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 padding: '1.5rem 1rem',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
                 borderRadius: 16,
                 textAlign: 'center',
                 cursor: 'pointer',
@@ -113,13 +113,13 @@ export default function Home() {
                 }}
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLDivElement;
-                  el.style.borderColor = 'rgba(255,255,255,0.08)';
-                  el.style.background = 'rgba(255,255,255,0.03)';
+                  el.style.borderColor = 'var(--color-border)';
+                  el.style.background = 'var(--color-surface)';
                   el.style.transform = 'translateY(0)';
                 }}
               >
                 <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{cat.icon}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>{cat.label}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)' }}>{cat.label}</div>
               </div>
             </Link>
           ))}
@@ -131,8 +131,8 @@ export default function Home() {
         <section style={{ maxWidth: 1280, margin: '0 auto', padding: '3rem 1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em', margin: '0 0 0.25rem' }}>Latest Opportunities</h2>
-              <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0 }}>Fresh gigs posted by clients</p>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', margin: '0 0 0.25rem' }}>Latest Opportunities</h2>
+              <p style={{ color: 'var(--color-text-faint)', fontSize: '0.9rem', margin: 0 }}>Fresh gigs posted by clients</p>
             </div>
             <Link to="/gigs" className="btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>View All</Link>
           </div>
@@ -145,8 +145,8 @@ export default function Home() {
       {/* How it works */}
       <section style={{ maxWidth: 900, margin: '0 auto', padding: '4rem 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em', margin: '0 0 0.5rem' }}>How It Works</h2>
-          <p style={{ color: '#475569' }}>Simple steps to get started</p>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', margin: '0 0 0.5rem' }}>How It Works</h2>
+          <p style={{ color: 'var(--color-text-faint)' }}>Simple steps to get started</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
           {[
@@ -157,15 +157,15 @@ export default function Home() {
           ].map(item => (
             <div key={item.step} style={{
               padding: '1.75rem',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
               borderRadius: 16,
               position: 'relative',
             }}>
               <div style={{ fontSize: '0.7rem', fontWeight: 800, color: item.color, letterSpacing: '0.1em', marginBottom: '0.75rem', opacity: 0.7 }}>STEP {item.step}</div>
               <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{item.icon}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', margin: '0 0 0.5rem' }}>{item.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', margin: '0 0 0.5rem' }}>{item.title}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-faint)', lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
             </div>
           ))}
         </div>
@@ -179,10 +179,10 @@ export default function Home() {
           border: '1px solid rgba(99,102,241,0.25)',
           borderRadius: 24, padding: '3rem 2rem',
         }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#e2e8f0', margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-text)', margin: '0 0 1rem', letterSpacing: '-0.02em' }}>
             Ready to get started?
           </h2>
-          <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Join thousands of professionals on SkillSphere.</p>
+          <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>Join thousands of professionals on SkillSphere.</p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/register" className="btn-primary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>Create Free Account</Link>
             <Link to="/gigs" className="btn-secondary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>Explore Gigs</Link>

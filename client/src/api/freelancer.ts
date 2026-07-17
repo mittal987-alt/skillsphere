@@ -1,13 +1,18 @@
-import api from './axios';
+import api from "./axios";
 
 export const freelancerApi = {
-  createProfile: (data: object) => api.post('/freelancer', data),
+  createProfile: (data: object) =>
+    api.post("/freelancers", data),
 
-  getMyProfile: () => api.get('/freelancer/me'),
+  getMyProfile: () =>
+    api.get("/freelancers/me"),
 
-  updateProfile: (data: object) => api.put('/freelancer/me', data),
+  updateProfile: (data: object) =>
+    api.put("/freelancers/me", data),
 
-  deleteProfile: () => api.delete('/freelancer/me'),
+  deleteProfile: () =>
+    api.delete("/freelancers/me"),
 
-  getById: (id: string) => api.get(`/freelancer/${id}`),
+  getById: (id: string) =>
+    api.get(`/freelancers/${id}`),
 };

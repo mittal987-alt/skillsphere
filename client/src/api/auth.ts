@@ -1,13 +1,30 @@
-import api from './axios';
+import axios from "./axios";
 
 export const authApi = {
-  register: (data: { name: string; email: string; password: string; role: string }) =>
-    api.post('/auth/register', data),
 
-  login: (data: { email: string; password: string }) =>
-    api.post('/auth/login', data),
+  login: (data: any) =>
+    axios.post("/auth/login", data),
 
-  logout: () => api.post('/auth/logout'),
+  register: (data: any) =>
+    axios.post("/auth/register", data),
 
-  getMe: () => api.get('/auth/me'),
+  getMe: () =>
+    axios.get("/auth/me"),
+
+  logout: () =>
+    axios.post("/auth/logout"),
+
+  forgotPassword: (email: string) =>
+    axios.post("/auth/forgot-password", {
+      email,
+    }),
+
+  resetPassword: (
+    token: string,
+    password: string
+  ) =>
+    axios.post(`/auth/reset-password/${token}`, {
+      password,
+    }),
+
 };

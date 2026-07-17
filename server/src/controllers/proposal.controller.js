@@ -77,16 +77,11 @@ await sendEmail({
 });
 
 res.status(201).json({
-    success:true,
-    message:"Proposal submitted successfully",
+    success: true,
+    message: "Proposal submitted successfully",
     proposal,
-});
+  });
 
-    res.status(201).json({
-      success: true,
-      message: "Proposal submitted successfully",
-      proposal,
-    });
 
   } catch (error) {
     res.status(500).json({

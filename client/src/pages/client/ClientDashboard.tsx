@@ -19,6 +19,7 @@ export default function ClientDashboard() {
   const openGigs = gigs.filter(g => g.status === 'Open').length;
   const inProgressGigs = gigs.filter(g => g.status === 'In Progress').length;
   const completedGigs = gigs.filter(g => g.status === 'Completed').length;
+ 
 
   return (
     <div className="page-container">

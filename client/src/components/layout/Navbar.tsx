@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { type RootState, type AppDispatch } from '../../redux/store';
 import { notificationsApi } from '../../api/notifications';
@@ -25,8 +26,25 @@ const XIcon = () => (
   </svg>
 );
 
+const SunIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+);
+
 export default function Navbar() {
   const { user, isAuthenticated, logoutUser } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const { notifications, unreadCount } = useSelector((state: RootState) => state.notifications);
   const navigate = useNavigate();
@@ -69,9 +87,9 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(8, 8, 26, 0.85)',
+      background: 'var(--color-navbar-bg)',
       backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
+      borderBottom: '1px solid var(--color-navbar-border)',
     }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
         {/* Logo */}
@@ -82,7 +100,7 @@ export default function Navbar() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 800, color: 'white', fontSize: 16
           }}>S</div>
-          <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'white', letterSpacing: '-0.02em' }}>
+          <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-logo-text)', letterSpacing: '-0.02em' }}>
             Skill<span style={{ background: 'linear-gradient(135deg,#6366f1,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Sphere</span>
           </span>
         </Link>
@@ -90,27 +108,44 @@ export default function Navbar() {
         {/* Desktop Nav Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="desktop-nav">
           <NavLink to="/gigs" style={({ isActive }) => ({
-            color: isActive ? '#a78bfa' : '#94a3b8', textDecoration: 'none',
+            color: isActive ? 'var(--color-nav-link-active)' : 'var(--color-nav-link)', textDecoration: 'none',
             fontWeight: 500, fontSize: '0.9rem', transition: 'color 0.2s',
           })}>Browse Gigs</NavLink>
 
           {isAuthenticated && (
             <NavLink to={dashboardLink()} style={({ isActive }) => ({
-              color: isActive ? '#a78bfa' : '#94a3b8', textDecoration: 'none',
+              color: isActive ? 'var(--color-nav-link-active)' : 'var(--color-nav-link)', textDecoration: 'none',
               fontWeight: 500, fontSize: '0.9rem',
             })}>Dashboard</NavLink>
           )}
 
           {isAuthenticated && (
             <NavLink to="/chat" style={({ isActive }) => ({
-              color: isActive ? '#a78bfa' : '#94a3b8', textDecoration: 'none',
+              color: isActive ? 'var(--color-nav-link-active)' : 'var(--color-nav-link)', textDecoration: 'none',
               fontWeight: 500, fontSize: '0.9rem',
             })}>Messages</NavLink>
           )}
         </div>
 
         {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Theme toggle */}
+          <button
+            id="theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--color-nav-link)',
+              cursor: 'pointer', padding: 6, borderRadius: 8,
+              transition: 'color 0.2s, background 0.2s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-nav-link-active)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-surface-hover)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-nav-link)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          >
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
+
           {isAuthenticated ? (
             <>
               {/* Notification bell */}
@@ -119,12 +154,12 @@ export default function Navbar() {
                   id="notif-bell-btn"
                   onClick={() => setNotifOpen(v => !v)}
                   style={{
-                    background: 'transparent', border: 'none', color: '#94a3b8',
+                    background: 'transparent', border: 'none', color: 'var(--color-nav-link)',
                     cursor: 'pointer', position: 'relative', padding: '6px',
                     borderRadius: 8, transition: 'color 0.2s, background 0.2s',
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#a78bfa'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(167,139,250,0.1)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-nav-link-active)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-surface-hover)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-nav-link)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                 >
                   <BellIcon />
                   {unreadCount > 0 && (
@@ -143,11 +178,11 @@ export default function Navbar() {
                   <div style={{
                     position: 'absolute', top: 'calc(100% + 12px)', right: 0,
                     width: 340, maxHeight: 440, overflowY: 'auto',
-                    background: '#0f0f23', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+                    background: 'var(--color-dropdown-bg)', border: '1px solid var(--color-dropdown-border)',
+                    borderRadius: 16, boxShadow: 'var(--shadow-dropdown)',
                     zIndex: 100,
                   }}>
-                    <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-dropdown-divider)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Notifications</span>
                       {unreadCount > 0 && (
                         <button
@@ -157,25 +192,25 @@ export default function Navbar() {
                       )}
                     </div>
                     {notifications.length === 0 ? (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: '#475569' }}>No notifications</div>
+                      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-faint)' }}>No notifications</div>
                     ) : (
                       notifications.map(n => (
                         <div key={n._id} style={{
                           padding: '0.875rem 1.25rem',
-                          borderBottom: '1px solid rgba(255,255,255,0.05)',
-                          background: n.isRead ? 'transparent' : 'rgba(99,102,241,0.05)',
+                          borderBottom: '1px solid var(--color-dropdown-divider)',
+                          background: n.isRead ? 'transparent' : 'var(--color-notif-unread-bg)',
                           cursor: 'pointer', transition: 'background 0.2s',
                           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem',
                         }}
                           onClick={() => { if (!n.isRead) { notificationsApi.markAsRead(n._id); dispatch(markRead(n._id)); } if (n.link) navigate(n.link); setNotifOpen(false); }}
                         >
                           <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: n.isRead ? '#94a3b8' : '#e2e8f0', marginBottom: '0.2rem' }}>{n.title}</div>
-                            <div style={{ fontSize: '0.78rem', color: '#475569' }}>{n.message}</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: n.isRead ? 'var(--color-text-muted)' : 'var(--color-text)', marginBottom: '0.2rem' }}>{n.title}</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--color-text-faint)' }}>{n.message}</div>
                           </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); notificationsApi.deleteNotification(n._id); dispatch(removeNotification(n._id)); }}
-                            style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: 2, flexShrink: 0 }}
+                            style={{ background: 'none', border: 'none', color: 'var(--color-text-faint)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: 2, flexShrink: 0 }}
                           >×</button>
                         </div>
                       ))
@@ -191,13 +226,13 @@ export default function Navbar() {
                   onClick={() => setUserMenuOpen(v => !v)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'var(--color-user-btn-bg)', border: '1px solid var(--color-user-btn-border)',
                     borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
-                    color: '#e2e8f0', fontWeight: 600, fontSize: '0.85rem',
+                    color: 'var(--color-text)', fontWeight: 600, fontSize: '0.85rem',
                     transition: 'all 0.2s',
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(167,139,250,0.4)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-user-btn-border-hover)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-user-btn-border)'; }}
                 >
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',
@@ -213,16 +248,16 @@ export default function Navbar() {
                 {userMenuOpen && (
                   <div style={{
                     position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                    minWidth: 180, background: '#0f0f23',
-                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)', zIndex: 100, overflow: 'hidden',
+                    minWidth: 180, background: 'var(--color-dropdown-bg)',
+                    border: '1px solid var(--color-dropdown-border)', borderRadius: 12,
+                    boxShadow: 'var(--shadow-dropdown)', zIndex: 100, overflow: 'hidden',
                   }}>
-                    <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: '0.8rem', color: '#475569' }}>
+                    <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-dropdown-divider)', fontSize: '0.8rem', color: 'var(--color-text-faint)' }}>
                       {user?.email}
-                      <div style={{ fontWeight: 600, color: '#94a3b8', marginTop: 2, textTransform: 'capitalize' }}>{user?.role}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--color-text-muted)', marginTop: 2, textTransform: 'capitalize' }}>{user?.role}</div>
                     </div>
-                    <Link to={dashboardLink()} onClick={() => setUserMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: '#94a3b8', textDecoration: 'none', fontSize: '0.875rem', transition: 'background 0.15s' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                    <Link to={dashboardLink()} onClick={() => setUserMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 1rem', color: 'var(--color-text-muted)', textDecoration: 'none', fontSize: '0.875rem', transition: 'background 0.15s' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--color-dropdown-hover)'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; }}
                     >Dashboard</Link>
                     <button onClick={handleLogout} style={{ display: 'block', width: '100%', padding: '0.75rem 1rem', textAlign: 'left', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.875rem', transition: 'background 0.15s' }}
@@ -243,7 +278,7 @@ export default function Navbar() {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileOpen(v => !v)}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 4, display: 'none' }}
+            style={{ background: 'none', border: 'none', color: 'var(--color-nav-link)', cursor: 'pointer', padding: 4, display: 'none' }}
             className="mobile-menu-btn"
           >
             {mobileOpen ? <XIcon /> : <MenuIcon />}
@@ -253,17 +288,17 @@ export default function Navbar() {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div style={{ background: '#0f0f23', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Link to="/gigs" onClick={() => setMobileOpen(false)} style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Browse Gigs</Link>
+        <div style={{ background: 'var(--color-dropdown-bg)', borderTop: '1px solid var(--color-dropdown-divider)', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Link to="/gigs" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Browse Gigs</Link>
           {isAuthenticated ? (
             <>
-              <Link to={dashboardLink()} onClick={() => setMobileOpen(false)} style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
-              <Link to="/chat" onClick={() => setMobileOpen(false)} style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Messages</Link>
+              <Link to={dashboardLink()} onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+              <Link to="/chat" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Messages</Link>
               <button onClick={() => { handleLogout(); setMobileOpen(false); }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', textAlign: 'left', fontWeight: 500, padding: 0 }}>Sign Out</button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMobileOpen(false)} style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Sign In</Link>
               <Link to="/register" onClick={() => setMobileOpen(false)} style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 700 }}>Get Started</Link>
             </>
           )}

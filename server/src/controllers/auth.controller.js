@@ -2,6 +2,8 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import {sendEmail} from "../services/email.service.js";
 import welcomeEmail from "../../templates/welcomeEmail.js";
+import Client from "../models/client.js";
+import Freelancer from "../models/Freelancer.js";
 
 
 
@@ -37,6 +39,18 @@ export const registerUser = async (req, res) => {
       password,
       role,
     });
+    if (role === "client") {
+  await Client.create({
+    user: user._id,
+    companyName: `${name}'s Company`,
+  });
+}
+
+if (role === "freelancer") {
+  await Freelancer.create({
+    user: user._id,
+  });
+}
 
     try {
   await sendEmail({

@@ -14,23 +14,22 @@ import { authorize } from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
-// Public Routes
+// ---------- Public ----------
 router.get("/", getAllGigs);
-router.get("/:id", getGigById);
 
-// Client Routes
-router.post(
-  "/",
-  protect,
-  authorize("client"),
-  createGig
-);
-
+// ---------- Client ----------
 router.get(
   "/my",
   protect,
   authorize("client"),
   getMyGigs
+);
+
+router.post(
+  "/",
+  protect,
+  authorize("client"),
+  createGig
 );
 
 router.put(
@@ -46,5 +45,8 @@ router.delete(
   authorize("client"),
   deleteGig
 );
+
+// ---------- Public ----------
+router.get("/:id", getGigById);
 
 export default router;

@@ -3,13 +3,13 @@
 
 /* ============================================================
    SkillSphere Design System
-   Dark premium, glassmorphism aesthetic
+   Dark premium, glassmorphism aesthetic — with light mode
    ============================================================ */
 
 :root {
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Colors */
+  /* Colors – dark (default) */
   --color-bg: #08081a;
   --color-bg-secondary: #0f0f23;
   --color-surface: rgba(255, 255, 255, 0.04);
@@ -31,9 +31,26 @@
   --color-text-muted: #94a3b8;
   --color-text-faint: #475569;
 
+  /* Navbar */
+  --color-navbar-bg: rgba(8, 8, 26, 0.85);
+  --color-navbar-border: rgba(255, 255, 255, 0.07);
+  --color-nav-link: #94a3b8;
+  --color-nav-link-active: #a78bfa;
+  --color-dropdown-bg: #0f0f23;
+  --color-dropdown-border: rgba(255, 255, 255, 0.1);
+  --color-dropdown-divider: rgba(255, 255, 255, 0.07);
+  --color-dropdown-hover: rgba(255, 255, 255, 0.04);
+  --color-user-btn-bg: rgba(255, 255, 255, 0.05);
+  --color-user-btn-border: rgba(255, 255, 255, 0.1);
+  --color-user-btn-border-hover: rgba(167, 139, 250, 0.4);
+  --color-notif-unread-bg: rgba(99, 102, 241, 0.05);
+  --color-logo-text: #ffffff;
+  --color-select-option-bg: #1a1a35;
+
   /* Shadows */
   --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-dropdown: 0 20px 60px rgba(0, 0, 0, 0.6);
 
   /* Radii */
   --radius-sm: 8px;
@@ -43,6 +60,78 @@
 
   /* Transitions */
   --transition: 0.2s ease;
+
+  /* Body background gradient */
+  --bg-gradient-1: rgba(99, 102, 241, 0.12);
+  --bg-gradient-2: rgba(139, 92, 246, 0.08);
+
+  /* Skeleton */
+  --skeleton-from: rgba(255, 255, 255, 0.03);
+  --skeleton-to: rgba(255, 255, 255, 0.07);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(99, 102, 241, 0.3);
+  --scrollbar-thumb-hover: rgba(99, 102, 241, 0.5);
+
+  /* Input */
+  --color-input-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================
+   Light theme overrides
+   ============================================================ */
+[data-theme="light"] {
+  --color-bg: #f5f7fb;
+  --color-bg-secondary: #ffffff;
+  --color-surface: rgba(255, 255, 255, 0.85);
+  --color-surface-hover: rgba(0, 0, 0, 0.04);
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.14);
+
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-secondary: #7c3aed;
+  --color-accent: #6d28d9;
+
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+
+  /* Navbar */
+  --color-navbar-bg: rgba(255, 255, 255, 0.88);
+  --color-navbar-border: rgba(0, 0, 0, 0.06);
+  --color-nav-link: #64748b;
+  --color-nav-link-active: #6366f1;
+  --color-dropdown-bg: #ffffff;
+  --color-dropdown-border: rgba(0, 0, 0, 0.1);
+  --color-dropdown-divider: rgba(0, 0, 0, 0.06);
+  --color-dropdown-hover: rgba(0, 0, 0, 0.04);
+  --color-user-btn-bg: rgba(0, 0, 0, 0.04);
+  --color-user-btn-border: rgba(0, 0, 0, 0.1);
+  --color-user-btn-border-hover: rgba(99, 102, 241, 0.4);
+  --color-notif-unread-bg: rgba(99, 102, 241, 0.07);
+  --color-logo-text: #1e293b;
+  --color-select-option-bg: #ffffff;
+
+  /* Shadows */
+  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.08);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-dropdown: 0 12px 40px rgba(0, 0, 0, 0.12);
+
+  /* Body background gradient */
+  --bg-gradient-1: rgba(99, 102, 241, 0.06);
+  --bg-gradient-2: rgba(139, 92, 246, 0.04);
+
+  /* Skeleton */
+  --skeleton-from: rgba(0, 0, 0, 0.04);
+  --skeleton-to: rgba(0, 0, 0, 0.08);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(99, 102, 241, 0.25);
+  --scrollbar-thumb-hover: rgba(99, 102, 241, 0.45);
+
+  /* Input */
+  --color-input-bg: rgba(0, 0, 0, 0.03);
 }
 
 /* ============================================================
@@ -56,6 +145,11 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -66,6 +160,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Background grid/gradient */
@@ -74,10 +169,11 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--bg-gradient-1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, var(--bg-gradient-2) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+  transition: background 0.3s ease;
 }
 
 #root {
@@ -193,7 +289,7 @@ body::before {
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-input-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text);
@@ -220,7 +316,7 @@ body::before {
 .textarea {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-input-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text);
@@ -241,7 +337,7 @@ body::before {
 .select {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-input-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text);
@@ -253,7 +349,7 @@ body::before {
 }
 
 .select option {
-  background: #1a1a35;
+  background: var(--color-select-option-bg);
   color: var(--color-text);
 }
 
@@ -325,9 +421,9 @@ body::before {
 
 .skeleton {
   background: linear-gradient(90deg,
-    rgba(255,255,255,0.03) 25%,
-    rgba(255,255,255,0.07) 50%,
-    rgba(255,255,255,0.03) 75%
+    var(--skeleton-from) 25%,
+    var(--skeleton-to) 50%,
+    var(--skeleton-from) 75%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite linear;
@@ -347,8 +443,8 @@ body::before {
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
 /* Divider */
 .divider {

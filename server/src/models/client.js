@@ -8,11 +8,12 @@ const clientSchema = new mongoose.Schema(
         required:true,
         unique:true
     },
+    companyName: {
+    type: String,
+    default: "",
+},
 
-    companyName:{
-        type:String,
-        required:true
-    },
+   
 
     companyLogo:{
         type:String,
@@ -60,5 +61,8 @@ const clientSchema = new mongoose.Schema(
 {
     timestamps:true
 });
+const Client =
+  mongoose.models.Client ||
+  mongoose.model("Client", clientSchema);
 
-export default mongoose.model("Client",clientSchema);
+export default Client;
