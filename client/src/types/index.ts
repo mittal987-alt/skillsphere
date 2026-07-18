@@ -89,7 +89,7 @@ export interface Proposal {
   coverLetter: string;
   bidAmount: number;
   estimatedDays: number;
-  status: 'Pending' | 'Accepted' | 'Rejected' | 'Withdrawn';
+  status: 'Pending' | 'Accepted' | 'Rejected' | 'Withdrawn' | 'Completed' | 'Approved';
   createdAt: string;
 }
 
@@ -125,14 +125,23 @@ export interface Notification {
 
 export interface Payment {
   _id: string;
-  client: string;
-  freelancer: string;
+  client: ClientProfile | string;
+  freelancer: FreelancerProfile | string;
   gig: Gig | string;
+  proposal: string;
   amount: number;
-  status: 'Pending' | 'Paid' | 'Failed';
+  /** 10% platform commission */
+  platformFee: number;
+  /** amount minus platformFee — what the freelancer receives */
+  freelancerAmount: number;
+  currency: string;
+  paymentMethod: string;
+  status: 'Pending' | 'Paid' | 'Failed' | 'Refunded' | 'Released';
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  razorpaySignature?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Review {

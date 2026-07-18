@@ -31,6 +31,18 @@ const paymentSchema = new mongoose.Schema(
         required:true
     },
 
+    // 10% platform fee retained by SkillSphere
+    platformFee:{
+        type:Number,
+        default:0
+    },
+
+    // Amount the freelancer actually receives (amount - platformFee)
+    freelancerAmount:{
+        type:Number,
+        default:0
+    },
+
     currency:{
         type:String,
         default:"INR"
@@ -53,7 +65,8 @@ const paymentSchema = new mongoose.Schema(
             "Pending",
             "Paid",
             "Failed",
-            "Refunded"
+            "Refunded",
+            "Released"
         ],
         default:"Pending"
     }

@@ -7,7 +7,10 @@ import {
 } from "@tanstack/react-query";
 
 import { freelancerApi } from "../../api/freelancer";
+import { reviewsApi } from "../../api/reviews";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import StarRating from "../../components/common/StarRating";
+import { type Review, type ClientProfile, type User } from "../../types";
 
 interface ProfileForm {
   title: string;
@@ -39,6 +42,13 @@ export default function MyProfile() {
       return res.data.data;
     },
     retry: false,
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["freelancer-reviews", profile?._id],
+    queryFn: () => reviewsApi.getFreelancerReviews(profile!._id),
+    select: (r) => r.data.reviews as Review[],
+    enabled: !!profile?._id,
   });
 
   const {
@@ -356,6 +366,58 @@ export default function MyProfile() {
           </button>
         </form>
       </div>
+
+      {/* Reviews Section */}
+      {profile && (
+        <div style={{ marginTop: '3rem' }}>
+          <h2 className="section-title" style={{ fontSize: '1.35rem', marginBottom: '1.5rem' }}>Client Reviews & Feedback</h2>
+          
+          {(!reviews || reviews.length === 0) ? (
+            <div className="glass" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⭐</div>
+              <h3 style={{ color: '#e2e8f0', marginBottom: '0.5rem' }}>No reviews yet</h3>
+              <p>Complete gigs to start receiving feedback from clients.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {reviews.map((r) => {
+                // @ts-ignore - Temporary bypass for nested populations
+                const client = r.client && typeof r.client === 'object' ? r.client : null;
+                const clientUser = client && client.user ? client.user : null;
+
+                return (
+                  <div key={r._id} className="glass" style={{ padding: '1.5rem', borderRadius: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #10b981, #059669)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#fff', fontWeight: 700, fontSize: '1rem', flexShrink: 0
+                        }}>
+                          {clientUser?.name?.[0]?.toUpperCase() || 'C'}
+                        </div>
+                        <div>
+                          <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '0.95rem' }}>
+                            {clientUser?.name || 'Client'}
+                          </div>
+                          <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      <StarRating rating={r.rating} size={15} />
+                    </div>
+                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                      "{r.review}"
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

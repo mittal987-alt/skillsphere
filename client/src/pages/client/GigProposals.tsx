@@ -1,15 +1,19 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { proposalsApi } from '../../api/proposals';
 import { gigsApi } from '../../api/gigs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
-import {type Proposal } from '../../types';
+import PaymentModal from '../../components/common/PaymentModal';
+import { type Proposal } from '../../types';
 
 export default function GigProposals() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  const [payingProposal, setPayingProposal] = useState<Proposal | null>(null);
 
   const { data: gig } = useQuery({
     queryKey: ['gig', id],
@@ -38,9 +42,26 @@ export default function GigProposals() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['proposals', 'gig', id] }),
   });
 
+  const approveMutation = useMutation({
+    mutationFn: (proposalId: string) => proposalsApi.approveJob(proposalId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['proposals', 'gig', id] });
+      qc.invalidateQueries({ queryKey: ['client-gigs'] });
+    },
+  });
+
+  const getFreelancerInfo = (proposal: Proposal) => {
+    const freelancer = typeof proposal.freelancer === 'object' ? proposal.freelancer : null;
+    const freelancerUser = freelancer && typeof freelancer.user === 'object' ? freelancer.user : null;
+    return { freelancer, freelancerUser };
+  };
+
   return (
     <div className="page-container">
-      <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1.5rem', fontSize: '0.875rem', padding: 0 }}>
+      <button
+        onClick={() => navigate(-1)}
+        style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1.5rem', fontSize: '0.875rem', padding: 0 }}
+      >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>
         Back
       </button>
@@ -65,20 +86,34 @@ export default function GigProposals() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-            {proposals.length} proposal{proposals.length !== 1 ? 's' : ''} received · sorted by bid amount
+            {proposals.length} proposal{proposals.length !== 1 ? 's' : ''} received
           </div>
+
           {proposals.map(proposal => {
-            const freelancer = typeof proposal.freelancer === 'object' ? proposal.freelancer : null;
-            const freelancerUser = freelancer && typeof freelancer.user === 'object' ? freelancer.user : null;
+            const { freelancer, freelancerUser } = getFreelancerInfo(proposal);
             const isPending = proposal.status === 'Pending';
+            const isAccepted = proposal.status === 'Accepted';
+            const isCompleted = proposal.status === 'Completed';
 
             return (
-              <div key={proposal._id} className="glass" style={{ padding: '1.5rem', opacity: proposal.status === 'Rejected' ? 0.6 : 1 }}>
+              <div
+                key={proposal._id}
+                className="glass"
+                style={{
+                  padding: '1.5rem',
+                  opacity: proposal.status === 'Rejected' ? 0.55 : 1,
+                  transition: 'opacity 0.2s',
+                  borderColor: isAccepted ? 'rgba(16,185,129,0.3)' : undefined,
+                }}
+              >
+                {/* Header row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
-                      width: 44, height: 44, borderRadius: '50%',
-                      background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                      width: 46, height: 46, borderRadius: '50%',
+                      background: isAccepted
+                        ? 'linear-gradient(135deg,#10b981,#059669)'
+                        : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontWeight: 700, color: 'white', fontSize: '1rem', flexShrink: 0,
                     }}>
@@ -94,14 +129,20 @@ export default function GigProposals() {
                       )}
                     </div>
                   </div>
+
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>${proposal.bidAmount}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#475569' }}>{proposal.estimatedDays} days</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#10b981' }}>
+                      ₹{proposal.bidAmount.toLocaleString('en-IN')}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#475569' }}>{proposal.estimatedDays} days delivery</div>
                   </div>
                 </div>
 
-                <p style={{ color: '#94a3b8', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: '1rem' }}>{proposal.coverLetter}</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                  {proposal.coverLetter}
+                </p>
 
+                {/* Footer row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span className={`badge badge-${proposal.status.toLowerCase()}`}>{proposal.status}</span>
@@ -110,33 +151,84 @@ export default function GigProposals() {
                     </span>
                   </div>
 
-                  {isPending && (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {isPending && (
+                      <>
+                        <button
+                          id={`accept-proposal-${proposal._id}`}
+                          className="btn-primary"
+                          onClick={() => acceptMutation.mutate(proposal._id)}
+                          disabled={acceptMutation.isPending}
+                          style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+                        >
+                          {acceptMutation.isPending ? 'Accepting…' : 'Accept'}
+                        </button>
+                        <button
+                          className="btn-danger"
+                          onClick={() => rejectMutation.mutate(proposal._id)}
+                          disabled={rejectMutation.isPending}
+                          style={{ padding: '0.5rem 1rem' }}
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+
+                    {isAccepted && (
                       <button
-                        id={`accept-proposal-${proposal._id}`}
+                        id={`pay-proposal-${proposal._id}`}
+                        onClick={() => setPayingProposal(proposal)}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                          padding: '0.55rem 1.25rem',
+                          background: 'linear-gradient(135deg, #10b981, #059669)',
+                          color: 'white', fontWeight: 700, fontSize: '0.875rem',
+                          border: 'none', borderRadius: 8, cursor: 'pointer',
+                          boxShadow: '0 4px 16px rgba(16,185,129,0.3)',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                        </svg>
+                        Pay Now
+                      </button>
+                    )}
+
+                    {isCompleted && (
+                      <button
                         className="btn-primary"
-                        onClick={() => acceptMutation.mutate(proposal._id)}
-                        disabled={acceptMutation.isPending}
-                        style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+                        onClick={() => approveMutation.mutate(proposal._id)}
+                        disabled={approveMutation.isPending}
+                        style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
                       >
-                        Accept
+                        {approveMutation.isPending ? 'Approving…' : 'Approve Work'}
                       </button>
-                      <button
-                        className="btn-danger"
-                        onClick={() => rejectMutation.mutate(proposal._id)}
-                        disabled={rejectMutation.isPending}
-                        style={{ padding: '0.5rem 1.25rem' }}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Payment Modal */}
+      {payingProposal && (() => {
+        const { freelancerUser } = getFreelancerInfo(payingProposal);
+        return (
+          <PaymentModal
+            proposalId={payingProposal._id}
+            amount={payingProposal.bidAmount}
+            freelancerName={freelancerUser?.name || 'Freelancer'}
+            gigTitle={gig?.title || 'Gig'}
+            onClose={() => setPayingProposal(null)}
+            onSuccess={() => setPayingProposal(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

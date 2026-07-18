@@ -28,6 +28,19 @@ router.get(
   authorize("freelancer"),
   getMyProposals
 );
+router.put(
+    "/:id/complete",
+    protect,
+    authorize("freelancer"),
+    completeJob
+);
+
+router.put(
+    "/:id/approve",
+    protect,
+    authorize("client"),
+    approveJob
+);
 
 router.delete(
   "/:id",

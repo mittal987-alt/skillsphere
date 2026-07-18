@@ -7,6 +7,7 @@ import createNotification from "../utils/createNotification.js";
 import { sendEmail } from "../services/email.service.js";
 import proposalEmail from "../../templates/proposalEmail.js";
 
+
 // @desc Submit Proposal
 // @route POST /api/proposals
 // @access Private (Freelancer)
@@ -89,6 +90,82 @@ res.status(201).json({
       message: error.message,
     });
   }
+};
+export const completeJob = async (req, res) => {
+    try {
+
+        const proposal = await Proposal.findById(req.params.id);
+
+        if (!proposal) {
+            return res.status(404).json({
+                success: false,
+                message: "Proposal not found"
+            });
+        }
+
+        if (proposal.freelancer.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized"
+            });
+        }
+
+        proposal.status = "Completed";
+
+        await proposal.save();
+
+        const gig = await Gig.findById(proposal.gig);
+
+        gig.status = "Completed";
+
+        await gig.save();
+
+        res.json({
+            success: true,
+            message: "Work submitted successfully"
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+};
+
+export const approveJob = async (req, res) => {
+
+    try {
+
+        const proposal = await Proposal.findById(req.params.id);
+
+        if (!proposal) {
+            return res.status(404).json({
+                success: false,
+                message: "Proposal not found"
+            });
+        }
+
+        proposal.status = "Approved";
+
+        await proposal.save();
+
+        res.json({
+            success: true,
+            message: "Job approved"
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
 };
 
 // @desc Get My Proposals

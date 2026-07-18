@@ -14,6 +14,7 @@ const proposalSchema = new mongoose.Schema(
         required:true
     },
 
+
     coverLetter:{
         type:String,
         required:true,
@@ -36,7 +37,9 @@ const proposalSchema = new mongoose.Schema(
             "Pending",
             "Accepted",
             "Rejected",
-            "Withdrawn"
+            "Withdrawn",
+            "Completed",
+            "Approved"
         ],
         default:"Pending"
     }

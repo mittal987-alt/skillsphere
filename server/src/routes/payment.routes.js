@@ -3,6 +3,7 @@ import express from "express";
 import {
   createOrder,
   verifyPayment,
+  releasePayment,
   getMyPayments,
   getFreelancerPayments,
   getAllPayments,
@@ -31,6 +32,14 @@ router.post(
   protect,
   authorize("client"),
   verifyPayment
+);
+
+// Release Payment (After Approving Work)
+router.put(
+  "/release/:id",
+  protect,
+  authorize("client"),
+  releasePayment
 );
 
 // Client Payment History

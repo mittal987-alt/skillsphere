@@ -13,4 +13,8 @@ export const proposalsApi = {
   reject: (id: string) => api.put(`/proposals/${id}/reject`),
 
   withdraw: (id: string) => api.delete(`/proposals/${id}`),
+
+  completeJob: (id: string) => api.put(`/proposals/${id}/complete`),
+
+  approveJob: (id: string) => api.put(`/proposals/${id}/approve`),
 };
