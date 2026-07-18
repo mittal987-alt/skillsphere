@@ -51,6 +51,10 @@ export const sendMessage = async (req, res) => {
     const populatedMessage = await Message.findById(newMessage._id)
       .populate("sender", "name email avatar");
 
+    const io = req.app.get("io");
+
+io.to(conversationId).emit("newMessage", populatedMessage);
+    
     res.status(201).json({
       success: true,
       message: "Message sent successfully",
