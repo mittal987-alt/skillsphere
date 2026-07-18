@@ -27,8 +27,13 @@ export const useAuth = () => {
   };
 
   const logoutUser = async () => {
-    await authApi.logout();
-    dispatch(logout());
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error("Logout API error:", error);
+    } finally {
+      dispatch(logout());
+    }
   };
 
   return { user, token, isAuthenticated, loading, login, register, logoutUser };
