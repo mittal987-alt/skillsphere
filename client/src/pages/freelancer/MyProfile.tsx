@@ -25,6 +25,12 @@ interface ProfileForm {
     description?: string;
     projectUrl?: string;
   }[];
+  bankDetails: {
+    accountNumber: string;
+    ifscCode: string;
+    accountHolderName: string;
+    bankName: string;
+  };
 }
 
 export default function MyProfile() {
@@ -60,6 +66,12 @@ export default function MyProfile() {
   } = useForm<ProfileForm>({
     defaultValues: {
       portfolio: [],
+      bankDetails: {
+        accountNumber: "",
+        ifscCode: "",
+        accountHolderName: "",
+        bankName: ""
+      }
     },
   });
 
@@ -80,6 +92,12 @@ export default function MyProfile() {
       availability: profile.availability || "Available",
       languages: profile.languages?.join(", ") || "",
       portfolio: profile.portfolio || [],
+      bankDetails: profile.bankDetails || {
+        accountNumber: "",
+        ifscCode: "",
+        accountHolderName: "",
+        bankName: ""
+      }
     });
   }, [profile, reset]);
 
@@ -350,6 +368,35 @@ export default function MyProfile() {
                 </button>
               </div>
             ))}
+          </div>
+
+          <div style={{ marginTop: 25, paddingTop: 25, borderTop: "1px solid rgba(255,255,255,.08)" }}>
+            <h3 style={{ marginBottom: 15 }}>Bank Details</h3>
+            <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: 20 }}>
+              Provide your bank details to receive payouts securely.
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label">Account Holder Name</label>
+                <input className="input" {...register("bankDetails.accountHolderName")} />
+              </div>
+              <div className="form-group">
+                <label className="label">Bank Name</label>
+                <input className="input" {...register("bankDetails.bankName")} />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label">Account Number</label>
+                <input className="input" type="password" {...register("bankDetails.accountNumber")} />
+              </div>
+              <div className="form-group">
+                <label className="label">IFSC Code</label>
+                <input className="input" {...register("bankDetails.ifscCode")} />
+              </div>
+            </div>
           </div>
 
           <button

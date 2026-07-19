@@ -7,6 +7,8 @@ import {
   acceptProposal,
   rejectProposal,
   withdrawProposal,
+  completeJob,
+  approveJob,
 } from "../controllers/proposal.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";

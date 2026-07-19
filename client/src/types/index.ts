@@ -58,6 +58,12 @@ export interface FreelancerProfile {
   totalReviews: number;
   portfolio: PortfolioItem[];
   certifications: Certification[];
+  bankDetails?: {
+    accountNumber: string;
+    ifscCode: string;
+    accountHolderName: string;
+    bankName: string;
+  };
 }
 
 export interface PortfolioItem {

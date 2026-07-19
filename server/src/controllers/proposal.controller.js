@@ -103,7 +103,9 @@ export const completeJob = async (req, res) => {
             });
         }
 
-        if (proposal.freelancer.toString() !== req.user._id.toString()) {
+        const freelancer = await Freelancer.findOne({ user: req.user._id });
+
+        if (!freelancer || proposal.freelancer.toString() !== freelancer._id.toString()) {
             return res.status(403).json({
                 success: false,
                 message: "Unauthorized"

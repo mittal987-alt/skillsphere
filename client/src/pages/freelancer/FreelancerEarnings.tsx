@@ -33,11 +33,10 @@ export default function FreelancerEarnings() {
   });
 
   const payments = (respData?.payments ?? []) as Payment[];
-  // Server already returns net amounts; fall back to client-side calculation with 10% fee
-  const totalEarnings   = respData?.totalEarnings   ?? payments.filter(p => p.status === 'Released').reduce((s, p) => s + (p.freelancerAmount ?? p.amount * 0.9), 0);
-  const pendingEarnings = respData?.pendingEarnings  ?? payments.filter(p => p.status === 'Paid').reduce((s, p) => s + (p.freelancerAmount ?? p.amount * 0.9), 0);
-  const totalFeesPaid   = payments.reduce((s, p) => s + (p.platformFee ?? p.amount * 0.1), 0);
-  const totalJobs = payments.length;
+  const totalEarnings   = respData?.totalEarnings ?? 0;
+  const pendingEarnings = respData?.pendingEarnings ?? 0;
+  const completedJobs   = respData?.completedJobs ?? 0;
+  const averageRating   = respData?.averageRating ?? 0;
 
   const getClientName = (payment: Payment): string => {
     if (typeof payment.client === 'object') {
@@ -64,32 +63,32 @@ export default function FreelancerEarnings() {
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
         {[
           {
-            label: 'Total Earned',
+            label: 'Total Earnings',
             value: `₹${(totalEarnings as number).toLocaleString('en-IN')}`,
             color: '#10b981',
             icon: '💰',
             sub: 'Net (after 10% platform fee)',
           },
           {
-            label: 'In Escrow',
+            label: 'Pending',
             value: `₹${(pendingEarnings as number).toLocaleString('en-IN')}`,
             color: '#f59e0b',
-            icon: '🔒',
-            sub: 'Awaiting client release',
+            icon: '⏳',
+            sub: 'Awaiting clearance',
           },
           {
-            label: 'Platform Fee Paid',
-            value: `₹${totalFeesPaid.toLocaleString('en-IN')}`,
+            label: 'Completed Jobs',
+            value: String(completedJobs),
             color: '#8b5cf6',
-            icon: '🏛️',
-            sub: '10% of gross earnings',
+            icon: '✅',
+            sub: 'Successfully finished projects',
           },
           {
-            label: 'Total Jobs',
-            value: String(totalJobs),
-            color: '#6366f1',
-            icon: '📋',
-            sub: 'All-time transactions',
+            label: 'Average Rating',
+            value: `${(averageRating as number).toFixed(1)} ⭐`,
+            color: '#eab308',
+            icon: '⭐',
+            sub: 'Based on client reviews',
           },
         ].map(stat => (
           <div key={stat.label} className="stat-card">
@@ -122,21 +121,7 @@ export default function FreelancerEarnings() {
         </p>
       </div>
 
-      {/* Escrow notice if pending > 0 */}
-      {(pendingEarnings as number) > 0 && (
-        <div style={{
-          display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
-          background: 'rgba(245,158,11,0.07)',
-          border: '1px solid rgba(245,158,11,0.2)',
-          borderRadius: 12, padding: '1rem 1.25rem',
-          marginBottom: '2rem',
-        }}>
-          <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>⏳</span>
-          <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0, lineHeight: 1.7 }}>
-            <strong style={{ color: '#f59e0b' }}>₹{(pendingEarnings as number).toLocaleString('en-IN')} is in escrow</strong> — waiting for clients to approve your work. Once they click "Release", funds will be available to you.
-          </p>
-        </div>
-      )}
+
 
       <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '1.25rem' }}>
         Transaction History
@@ -199,8 +184,8 @@ export default function FreelancerEarnings() {
                       </div>
                     </td>
                     <td style={{ padding: '1.1rem 1.25rem', whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 800, fontSize: '1rem', color: p.status === 'Released' ? '#10b981' : p.status === 'Paid' ? '#818cf8' : '#94a3b8' }}>
-                        {p.status === 'Released' ? '+' : ''}₹{(p.freelancerAmount ?? p.amount * 0.9).toLocaleString('en-IN')}
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: p.status === 'Paid' ? '#10b981' : '#94a3b8' }}>
+                        {p.status === 'Paid' ? '+' : ''}₹{(p.freelancerAmount ?? p.amount * 0.9).toLocaleString('en-IN')}
                       </div>
                       {p.platformFee > 0 && (
                         <div style={{ fontSize: '0.7rem', color: '#475569', marginTop: 2 }}>

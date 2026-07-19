@@ -35,6 +35,7 @@ export default function ClientPayments() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [releasingId, setReleasingId] = useState<string | null>(null);
   const [reviewPayment, setReviewPayment] = useState<Payment | null>(null);
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 
   const { data: payments, isLoading } = useQuery({
     queryKey: ['client-payments'],
@@ -42,20 +43,7 @@ export default function ClientPayments() {
     select: r => r.data.payments as Payment[],
   });
 
-  const releaseMutation = useMutation({
-    mutationFn: (paymentId: string) => paymentsApi.releasePayment(paymentId),
-    onMutate: (paymentId) => setReleasingId(paymentId),
-    onSettled: () => setReleasingId(null),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['client-payments'] });
-      qc.invalidateQueries({ queryKey: ['client-gigs'] });
-    },
-  });
-
-  // ── Derived stats ──
-  const totalSpent   = payments?.filter(p => ['Paid','Released'].includes(p.status)).reduce((s, p) => s + p.amount, 0) ?? 0;
-  const inEscrow     = payments?.filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0) ?? 0;
-  const released     = payments?.filter(p => p.status === 'Released').reduce((s, p) => s + p.amount, 0) ?? 0;
+  const totalSpent   = payments?.filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0) ?? 0;
 
   const filtered = payments?.filter(p => statusFilter === 'All' || p.status === statusFilter) ?? [];
 
@@ -72,6 +60,102 @@ export default function ClientPayments() {
     return '—';
   };
 
+  const getGigId = (payment: Payment): string => {
+    if (typeof payment.gig === 'object') return (payment.gig as { _id: string })._id;
+    return payment.gig as string;
+  };
+
+  const getFreelancerId = (payment: Payment): string => {
+    if (typeof payment.freelancer === 'object') return (payment.freelancer as FreelancerProfile)._id;
+    return payment.freelancer as string;
+  };
+
+  const generateInvoice = (payment: Payment) => {
+    const gigTitle = getGigTitle(payment);
+    const freelancerName = getFreelancerName(payment);
+    const date = new Date(payment.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    
+    const invoiceHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice - ${payment._id}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { margin: 0; color: #6366f1; font-size: 28px; }
+            .header p { margin: 4px 0; color: #6b7280; }
+            .details { margin-bottom: 40px; }
+            .details strong { display: inline-block; width: 120px; color: #111827; }
+            .details p { margin: 8px 0; color: #4b5563; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #e5e7eb; padding: 16px; text-align: left; }
+            th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+            td { color: #4b5563; }
+            .total { text-align: right; margin-top: 24px; font-size: 1.25rem; font-weight: bold; color: #10b981; }
+            @media print { 
+              body { padding: 0; } 
+              @page { margin: 1cm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1>SkillSphere</h1>
+              <p>Payment Receipt / Invoice</p>
+            </div>
+            <div style="text-align: right;">
+              <p>Invoice ID: <strong>#${payment._id.slice(-8).toUpperCase()}</strong></p>
+              <p>Date: ${date}</p>
+              <p style="color: #10b981; font-weight: bold;">Status: PAID</p>
+            </div>
+          </div>
+          
+          <div class="details">
+            <p><strong>Billed To:</strong> Client</p>
+            <p><strong>Freelancer:</strong> ${freelancerName}</p>
+            <p><strong>Gig:</strong> ${gigTitle}</p>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th style="text-align: right; width: 150px;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Payment for Gig: ${gigTitle}</td>
+                <td style="text-align: right;">₹${payment.amount.toLocaleString('en-IN')}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="total">
+            Total Paid: ₹${payment.amount.toLocaleString('en-IN')}
+          </div>
+          
+          <div style="margin-top: 60px; text-align: center; color: #9ca3af; font-size: 0.875rem; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+            <p>Thank you for using SkillSphere!</p>
+            <p>This is a computer-generated receipt.</p>
+          </div>
+          
+          <script>
+            window.onload = function() { window.print(); }
+          </script>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(invoiceHtml);
+      printWindow.document.close();
+    }
+  };
+
   return (
     <div className="page-container">
       {/* Header */}
@@ -84,8 +168,6 @@ export default function ClientPayments() {
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
         {[
           { label: 'Total Spent', value: `₹${totalSpent.toLocaleString('en-IN')}`, color: '#6366f1', icon: '💸' },
-          { label: 'In Escrow',   value: `₹${inEscrow.toLocaleString('en-IN')}`,   color: '#f59e0b', icon: '🔒' },
-          { label: 'Released',    value: `₹${released.toLocaleString('en-IN')}`,    color: '#10b981', icon: '✅' },
           { label: 'Transactions',value: String(payments?.length ?? 0),              color: '#8b5cf6', icon: '📋' },
         ].map(stat => (
           <div key={stat.label} className="stat-card">
@@ -194,55 +276,49 @@ export default function ClientPayments() {
                           <StatusBadge status={p.status} />
                         </td>
                         <td style={{ padding: '1.1rem 1.25rem' }}>
-                          {p.status === 'Paid' && (
-                            <button
-                              id={`release-payment-${p._id}`}
-                              onClick={() => releaseMutation.mutate(p._id)}
-                              disabled={releasingId === p._id}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                padding: '0.4rem 0.875rem',
-                                background: releasingId === p._id ? 'rgba(16,185,129,0.05)' : 'rgba(16,185,129,0.1)',
-                                border: '1px solid rgba(16,185,129,0.3)',
-                                borderRadius: 8, color: '#10b981', fontWeight: 700,
-                                fontSize: '0.78rem', cursor: releasingId === p._id ? 'wait' : 'pointer',
-                                transition: 'all 0.2s', whiteSpace: 'nowrap',
-                              }}
-                              onMouseEnter={e => { if (releasingId !== p._id) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(16,185,129,0.18)'; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(16,185,129,0.1)'; }}
-                            >
-                              {releasingId === p._id ? (
-                                <>
-                                  <span style={{ width: 10, height: 10, border: '2px solid rgba(16,185,129,0.3)', borderTopColor: '#10b981', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
-                                  Releasing…
-                                </>
-                              ) : (
-                                <>
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                  Release
-                                </>
-                              )}
-                            </button>
-                          )}
-                          {p.status === 'Released' && (
-                            <button
-                              onClick={() => setReviewPayment(p)}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                padding: '0.4rem 0.875rem',
-                                background: 'rgba(99,102,241,0.1)',
-                                border: '1px solid rgba(99,102,241,0.3)',
-                                borderRadius: 8, color: '#a78bfa', fontWeight: 600,
-                                fontSize: '0.78rem', cursor: 'pointer',
-                                transition: 'all 0.2s', whiteSpace: 'nowrap',
-                              }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.18)'; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.1)'; }}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                              Leave Review
-                            </button>
-                          )}
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {p.status === 'Paid' && (
+                              <button
+                                onClick={() => generateInvoice(p)}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                  padding: '0.4rem 0.875rem',
+                                  background: 'rgba(99,102,241,0.1)',
+                                  border: '1px solid rgba(99,102,241,0.3)',
+                                  borderRadius: 8, color: '#a78bfa', fontWeight: 600,
+                                  fontSize: '0.78rem', cursor: 'pointer',
+                                  transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.2)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.1)'; }}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                Invoice
+                              </button>
+                            )}
+                            {p.status === 'Released' && !reviewedIds.has(p._id) && (
+                              <button
+                                onClick={() => setReviewPayment(p)}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                  padding: '0.4rem 0.875rem',
+                                  background: 'rgba(245,158,11,0.1)',
+                                  border: '1px solid rgba(245,158,11,0.3)',
+                                  borderRadius: 8, color: '#f59e0b', fontWeight: 600,
+                                  fontSize: '0.78rem', cursor: 'pointer',
+                                  transition: 'all 0.2s', whiteSpace: 'nowrap',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(245,158,11,0.2)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(245,158,11,0.1)'; }}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                Leave a Review
+                              </button>
+                            )}
+                            {p.status === 'Released' && reviewedIds.has(p._id) && (
+                              <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 600 }}>✓ Reviewed</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -252,36 +328,30 @@ export default function ClientPayments() {
             </div>
           </div>
 
-          {/* Escrow explanation */}
-          {inEscrow > 0 && (
-            <div style={{
-              marginTop: '1.5rem',
-              display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
-              background: 'rgba(99,102,241,0.07)',
-              border: '1px solid rgba(99,102,241,0.18)',
-              borderRadius: 12, padding: '1rem 1.25rem',
-            }}>
-              <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🔒</span>
-              <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0, lineHeight: 1.7 }}>
-                <strong style={{ color: '#a78bfa' }}>₹{inEscrow.toLocaleString('en-IN')} is currently in escrow.</strong>{' '}
-                Click <strong>Release</strong> once you're satisfied with the freelancer's work to transfer the funds to them.
-              </p>
-            </div>
-          )}
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-
-          {reviewPayment && (
-            <ReviewModal
-              gigId={typeof reviewPayment.gig === 'object' ? reviewPayment.gig._id : reviewPayment.gig}
-              freelancerId={typeof reviewPayment.freelancer === 'object' ? reviewPayment.freelancer._id : reviewPayment.freelancer as string}
-              freelancerName={getFreelancerName(reviewPayment)}
-              gigTitle={getGigTitle(reviewPayment)}
-              onClose={() => setReviewPayment(null)}
-              onSuccess={() => setReviewPayment(null)}
-            />
-          )}
         </>
       )}
+
+      {/* Review Modal */}
+      {reviewPayment && (() => {
+        const gigId = getGigId(reviewPayment);
+        const freelancerId = getFreelancerId(reviewPayment);
+        const freelancerName = getFreelancerName(reviewPayment);
+        const gigTitle = getGigTitle(reviewPayment);
+        return (
+          <ReviewModal
+            gigId={gigId}
+            freelancerId={freelancerId}
+            freelancerName={freelancerName}
+            gigTitle={gigTitle}
+            onClose={() => setReviewPayment(null)}
+            onSuccess={() => {
+              setReviewedIds(prev => new Set(prev).add(reviewPayment._id));
+              setReviewPayment(null);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

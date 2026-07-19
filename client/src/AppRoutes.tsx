@@ -55,7 +55,7 @@ export default function AppRoutes() {
       <Route
         path="/reset-password/:token"
         element={<ResetPassword />}
-      />  
+      />
 
       {/* Client Routes */}
       <Route path="/client/dashboard" element={<ClientDashboard />} />

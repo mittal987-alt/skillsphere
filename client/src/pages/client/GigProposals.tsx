@@ -175,6 +175,12 @@ export default function GigProposals() {
                     )}
 
                     {isAccepted && (
+                      <span style={{ fontSize: '0.875rem', color: '#64748b', fontStyle: 'italic' }}>
+                        Waiting for freelancer to complete work
+                      </span>
+                    )}
+
+                    {isCompleted && (
                       <button
                         id={`pay-proposal-${proposal._id}`}
                         onClick={() => setPayingProposal(proposal)}
@@ -193,18 +199,7 @@ export default function GigProposals() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
                         </svg>
-                        Pay Now
-                      </button>
-                    )}
-
-                    {isCompleted && (
-                      <button
-                        className="btn-primary"
-                        onClick={() => approveMutation.mutate(proposal._id)}
-                        disabled={approveMutation.isPending}
-                        style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
-                      >
-                        {approveMutation.isPending ? 'Approving…' : 'Approve Work'}
+                        Approve & Pay
                       </button>
                     )}
                   </div>
@@ -221,6 +216,7 @@ export default function GigProposals() {
         return (
           <PaymentModal
             proposalId={payingProposal._id}
+            gigId={payingProposal.gig}
             amount={payingProposal.bidAmount}
             freelancerName={freelancerUser?.name || 'Freelancer'}
             gigTitle={gig?.title || 'Gig'}

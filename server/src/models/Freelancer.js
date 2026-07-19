@@ -88,7 +88,14 @@ certifications:[
     issueDate:Date
 
 }
-]
+],
+
+bankDetails: {
+    accountNumber: { type: String, default: "" },
+    ifscCode: { type: String, default: "" },
+    accountHolderName: { type: String, default: "" },
+    bankName: { type: String, default: "" }
+}
 
 },
 {

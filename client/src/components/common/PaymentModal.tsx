@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { paymentsApi } from '../../api/payments';
+import { proposalsApi } from '../../api/proposals';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface PaymentModalProps {
   proposalId: string;
+  gigId: string;
   amount: number;
   freelancerName: string;
   gigTitle: string;
@@ -34,6 +37,7 @@ function loadRazorpayScript(): Promise<boolean> {
 
 export default function PaymentModal({
   proposalId,
+  gigId,
   amount,
   freelancerName,
   gigTitle,
@@ -42,7 +46,11 @@ export default function PaymentModal({
 }: PaymentModalProps) {
   const [step, setStep] = useState<'confirm' | 'processing' | 'success' | 'error'>('confirm');
   const [errorMsg, setErrorMsg] = useState('');
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const handlePay = useCallback(async () => {
     setStep('processing');
@@ -57,41 +65,53 @@ export default function PaymentModal({
       const { data } = await paymentsApi.createOrder({ proposalId });
       const { order } = data;
 
-      // 3. Open Razorpay checkout
-      await new Promise<void>((resolve, reject) => {
-        const rzp = new window.Razorpay({
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_S3dDF3BgNwVbQ6',
-          amount: order.amount,
-          currency: order.currency,
-          order_id: order.id,
-          name: 'SkillSphere',
-          description: `Payment for: ${gigTitle}`,
-          theme: { color: '#6366f1' },
-          modal: {
-            ondismiss: () => reject(new Error('Payment cancelled')),
-          },
-          handler: async (response: {
-            razorpay_order_id: string;
-            razorpay_payment_id: string;
-            razorpay_signature: string;
-          }) => {
-            try {
-              await paymentsApi.verifyPayment({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              });
-              resolve();
-            } catch {
-              reject(new Error('Payment verification failed. Please contact support.'));
-            }
-          },
+      if (order.id.startsWith('mock_order_')) {
+        // Skip Razorpay UI for mock orders and simulate a success
+        await new Promise(res => setTimeout(res, 1200));
+        await paymentsApi.verifyPayment({
+          razorpay_order_id: order.id,
+          razorpay_payment_id: 'mock_payment_' + Date.now(),
+          razorpay_signature: 'mock_signature',
         });
-        rzp.on('payment.failed', (resp: { error: { description: string } }) => {
-          reject(new Error(resp.error?.description || 'Payment failed'));
+        await proposalsApi.approveJob(proposalId);
+      } else {
+        // 3. Open Razorpay checkout
+        await new Promise<void>((resolve, reject) => {
+          const rzp = new window.Razorpay({
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_S3dDF3BgNwVbQ6',
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.id,
+            name: 'SkillSphere',
+            description: `Payment for: ${gigTitle}`,
+            theme: { color: '#6366f1' },
+            modal: {
+              ondismiss: () => reject(new Error('Payment cancelled')),
+            },
+            handler: async (response: {
+              razorpay_order_id: string;
+              razorpay_payment_id: string;
+              razorpay_signature: string;
+            }) => {
+              try {
+                await paymentsApi.verifyPayment({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                });
+                await proposalsApi.approveJob(proposalId);
+                resolve();
+              } catch {
+                reject(new Error('Payment verification failed. Please contact support.'));
+              }
+            },
+          });
+          rzp.on('payment.failed', (resp: { error: { description: string } }) => {
+            reject(new Error(resp.error?.description || 'Payment failed'));
+          });
+          rzp.open();
         });
-        rzp.open();
-      });
+      }
 
       // 4. Success
       setStep('success');
@@ -280,39 +300,113 @@ export default function PaymentModal({
 
         {/* ── SUCCESS STEP ── */}
         {step === 'success' && (
-          <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <div style={{
-              width: 72, height: 72,
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1))',
-              border: '2px solid rgba(16,185,129,0.4)',
-              borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 1.5rem',
-              animation: 'checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1)',
-            }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+          <div style={{ padding: '1rem 0' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: 72, height: 72,
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1))',
+                border: '2px solid rgba(16,185,129,0.4)',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 1.5rem',
+                animation: 'checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1)',
+              }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 style={{ color: '#10b981', fontWeight: 800, fontSize: '1.25rem', marginBottom: 8 }}>Payment Successful!</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                The project is now completed. Please leave a review for <strong>{freelancerName}</strong>.
+              </p>
             </div>
-            <h3 style={{ color: '#10b981', fontWeight: 800, fontSize: '1.25rem', marginBottom: 8 }}>Payment Successful!</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-              ₹{amount.toLocaleString('en-IN')} is now held in escrow.
-            </p>
-            <p style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '2rem' }}>
-              The freelancer will be notified to begin work.
-            </p>
-            <button
-              onClick={() => { onSuccess(); onClose(); }}
-              style={{
-                padding: '0.75rem 2rem',
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                border: 'none', borderRadius: 10,
-                color: 'white', fontWeight: 700,
-                cursor: 'pointer', fontSize: '0.95rem',
-              }}
-            >
-              Done
-            </button>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setRating(star)}
+                    style={{
+                      background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                      color: star <= rating ? '#fbbf24' : '#475569',
+                      transition: 'transform 0.1s',
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.2)' }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)' }}
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill={star <= rating ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+              <textarea
+                placeholder="Write your review..."
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                rows={3}
+                style={{
+                  width: '100%', padding: '0.75rem', borderRadius: 8,
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#e2e8f0', fontSize: '0.9rem', resize: 'vertical'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => {
+                  onSuccess();
+                  onClose();
+                  navigate('/client/payments');
+                }}
+                disabled={submittingReview}
+                style={{
+                  flex: 1, padding: '0.75rem',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 10, color: '#94a3b8',
+                  fontWeight: 600, cursor: 'pointer',
+                  fontSize: '0.9rem',
+                }}
+              >
+                Skip
+              </button>
+              <button
+                disabled={submittingReview}
+                onClick={async () => {
+                  setSubmittingReview(true);
+                  try {
+                    await fetch('/api/reviews', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      },
+                      body: JSON.stringify({ gigId, rating, review: comment })
+                    });
+                    onSuccess();
+                    onClose();
+                    navigate('/client/payments');
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setSubmittingReview(false);
+                  }
+                }}
+                style={{
+                  flex: 2, padding: '0.75rem',
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  border: 'none', borderRadius: 10,
+                  color: 'white', fontWeight: 700,
+                  cursor: 'pointer', fontSize: '0.95rem',
+                  opacity: submittingReview ? 0.7 : 1,
+                }}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
           </div>
         )}
 
