@@ -138,11 +138,119 @@ export const deleteUser = async (req, res) => {
       });
     }
 
+    // Prevent deleting another admin
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot delete an admin account",
+      });
+    }
+
     await user.deleteOne();
 
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+
+// ======================================
+// Update User Role
+// PUT /api/admin/users/:id/role
+// ======================================
+
+export const updateUserRole = async (req, res) => {
+
+  try {
+
+    const { role } = req.body;
+
+    if (!["client", "freelancer", "admin"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role. Must be client, freelancer, or admin",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Prevent demoting yourself
+    if (user._id.toString() === req.user._id.toString() && role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot change your own role",
+      });
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User role updated to ${role}`,
+      user,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+
+// ======================================
+// Ban / Unban User
+// PUT /api/admin/users/:id/ban
+// ======================================
+
+export const banUser = async (req, res) => {
+
+  try {
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot ban an admin account",
+      });
+    }
+
+    user.isBanned = !user.isBanned;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: user.isBanned ? "User banned successfully" : "User unbanned successfully",
+      isBanned: user.isBanned,
     });
 
   } catch (error) {
@@ -278,7 +386,15 @@ export const getPayments = async (req, res) => {
   try {
 
     const payments = await Payment.find()
-      .populate("gig", "title")
+      .populate("gig", "title budget")
+      .populate({
+        path: "client",
+        populate: { path: "user", select: "name email" },
+      })
+      .populate({
+        path: "freelancer",
+        populate: { path: "user", select: "name email" },
+      })
       .sort({
         createdAt: -1,
       });
@@ -311,6 +427,7 @@ export const getReviews = async (req, res) => {
 
     const reviews = await Review.find()
       .populate("gig", "title")
+      .populate("reviewer", "name email")
       .sort({
         createdAt: -1,
       });
@@ -319,6 +436,42 @@ export const getReviews = async (req, res) => {
       success: true,
       count: reviews.length,
       reviews,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+
+// ======================================
+// Delete Review
+// DELETE /api/admin/reviews/:id
+// ======================================
+
+export const deleteReview = async (req, res) => {
+
+  try {
+
+    const review = await Review.findById(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    await review.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Review deleted successfully",
     });
 
   } catch (error) {

@@ -65,6 +65,10 @@ totalReviews: {
     type: Number,
     default: 0,
 },
+profileViews: {
+    type: Number,
+    default: 0,
+},
     portfolio:[
 {
     title:String,

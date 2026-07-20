@@ -95,7 +95,10 @@ export default function FreelancerDashboard() {
 
       {/* Quick actions */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-        <Link to="/gigs" className="btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
+        <Link to="/freelancer/matches" className="btn-primary" style={{ padding: '0.75rem 1.5rem', background: 'linear-gradient(135deg, #a855f7, #6366f1)', border: 'none', boxShadow: '0 4px 15px rgba(168,85,247,0.4)' }}>
+          <span style={{ marginRight: '0.5rem' }}>✨</span> AI Gig Matches
+        </Link>
+        <Link to="/gigs" className="btn-secondary" style={{ padding: '0.75rem 1.5rem' }}>
           Find Work
         </Link>
         <Link to="/freelancer/profile" className="btn-secondary" style={{ padding: '0.75rem 1.5rem' }}>
@@ -103,6 +106,9 @@ export default function FreelancerDashboard() {
         </Link>
         <Link to="/freelancer/earnings" className="btn-secondary" style={{ padding: '0.75rem 1.5rem' }}>
           My Earnings
+        </Link>
+        <Link to="/freelancer/analytics" className="btn-secondary" style={{ padding: '0.75rem 1.5rem', background: 'var(--color-surface)', color: '#8b5cf6', borderColor: '#8b5cf6' }}>
+          Analytics
         </Link>
         <Link to="/chat" className="btn-secondary" style={{ padding: '0.75rem 1.5rem' }}>
           Messages

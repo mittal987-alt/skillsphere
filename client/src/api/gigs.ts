@@ -4,12 +4,21 @@ export const gigsApi = {
   getAll: (params?: {
     category?: string;
     skill?: string;
+    experience?: string;
     minBudget?: number;
     maxBudget?: number;
     search?: string;
+    keyword?: string;
     page?: number;
     limit?: number;
-  }) => api.get('/gigs', { params }),
+  }) => {
+    const finalParams = { ...params };
+    if (finalParams.search) {
+      finalParams.keyword = finalParams.search;
+      delete finalParams.search;
+    }
+    return api.get('/search/gigs', { params: finalParams });
+  },
 
   getById: (id: string) => api.get(`/gigs/${id}`),
 

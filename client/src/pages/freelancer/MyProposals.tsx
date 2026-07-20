@@ -82,8 +82,11 @@ export default function MyProposals() {
                   </div>
                 )}
                 {proposal.status === 'Accepted' && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Link to="/chat" className="btn-primary">Message Client</Link>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    <Link to={`/gigs/${gig?._id}/tracker`} className="btn-primary" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                      Track Progress
+                    </Link>
+                    <Link to="/chat" className="btn-secondary">Message Client</Link>
                   </div>
                 )}
               </div>

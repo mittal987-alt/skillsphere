@@ -5,11 +5,14 @@ import {
   getUsers,
   getUser,
   deleteUser,
+  updateUserRole,
+  banUser,
   verifyFreelancer,
   getGigs,
   deleteGig,
   getPayments,
   getReviews,
+  deleteReview,
 } from "../controllers/admin.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
@@ -30,6 +33,8 @@ router.get("/dashboard", dashboard);
 router.get("/users", getUsers);
 router.get("/users/:id", getUser);
 router.delete("/users/:id", deleteUser);
+router.put("/users/:id/role", updateUserRole);
+router.put("/users/:id/ban", banUser);
 
 // Freelancers
 router.put(
@@ -46,5 +51,6 @@ router.get("/payments", getPayments);
 
 // Reviews
 router.get("/reviews", getReviews);
+router.delete("/reviews/:id", deleteReview);
 
 export default router;

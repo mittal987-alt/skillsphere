@@ -27,4 +27,7 @@ export const authApi = {
       password,
     }),
 
+  googleAuth: (credential: string, role?: string) =>
+    axios.post("/auth/google", { credential, role }),
+
 };

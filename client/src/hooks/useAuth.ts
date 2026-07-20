@@ -26,6 +26,12 @@ export const useAuth = () => {
     return res.data;
   };
 
+  const googleLogin = async (credential: string, role?: string) => {
+    const res = await authApi.googleAuth(credential, role);
+    dispatch(setCredentials({ user: res.data.user, token: res.data.token }));
+    return res.data;
+  };
+
   const logoutUser = async () => {
     try {
       await authApi.logout();
@@ -36,5 +42,6 @@ export const useAuth = () => {
     }
   };
 
-  return { user, token, isAuthenticated, loading, login, register, logoutUser };
+  return { user, token, isAuthenticated, loading, login, register, googleLogin, logoutUser };
 };
+

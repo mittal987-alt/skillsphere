@@ -12,6 +12,15 @@ import { authorize } from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
+import { getAnalyticsDashboard } from "../controllers/freelancerAnalytics.controller.js";
+
+router.get(
+    "/analytics/dashboard",
+    protect,
+    authorize("freelancer"),
+    getAnalyticsDashboard
+);
+
 router.post(
     "/",
     protect,

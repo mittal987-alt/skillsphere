@@ -157,22 +157,41 @@ export default function ChatPage() {
         ) : (
           <>
             {/* Chat Header */}
-            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {(() => {
-                const conv = conversations.find(c => c._id === activeConvId);
-                const other = conv ? getOtherUser(conv) : null;
-                return (
-                  <>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'white' }}>
-                      {other?.name?.[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>{other?.name}</h3>
-                      <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{conv?.gig?.title}</div>
-                    </div>
-                  </>
-                );
-              })()}
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {(() => {
+                  const conv = conversations.find(c => c._id === activeConvId);
+                  const other = conv ? getOtherUser(conv) : null;
+                  return (
+                    <>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'white' }}>
+                        {other?.name?.[0]?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>{other?.name}</h3>
+                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{conv?.gig?.title}</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Video Call Button */}
+              <button
+                onClick={() => window.open(`/room/${activeConvId}`, '_blank')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  background: 'rgba(99, 102, 241, 0.1)', color: '#a78bfa',
+                  border: '1px solid rgba(99, 102, 241, 0.2)', padding: '0.5rem 1rem',
+                  borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99, 102, 241, 0.2)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99, 102, 241, 0.1)'; }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                Join Collab Room
+              </button>
             </div>
 
             {/* Messages */}

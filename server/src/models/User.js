@@ -19,9 +19,14 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      required: false,
       minlength: 6,
       select: false,
+    },
+
+    googleId: {
+      type: String,
+      default: null,
     },
     resetPasswordToken: {
     type: String,
@@ -47,6 +52,11 @@ resetPasswordExpire: {
       type: Boolean,
       default: false,
     },
+
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -62,6 +72,7 @@ userSchema.pre("save", async function () {
 
 // Compare password
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

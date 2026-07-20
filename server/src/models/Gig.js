@@ -20,9 +20,26 @@ const milestoneSchema = new mongoose.Schema(
     completed:{
         type:Boolean,
         default:false
+    },
+
+    status:{
+        type:String,
+        enum:[
+            "Pending",
+            "Funds_Escrowed",
+            "Under_Review",
+            "Completed"
+        ],
+        default:"Pending"
+    },
+
+    submission:{
+        message: String,
+        fileUrl: String,
+        submittedAt: Date
     }
 
-},{_id:false});
+});
 
 const gigSchema = new mongoose.Schema({
 

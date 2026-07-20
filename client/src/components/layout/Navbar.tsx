@@ -5,7 +5,9 @@ import { useTheme } from '../../hooks/useTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { type RootState, type AppDispatch } from '../../redux/store';
 import { notificationsApi } from '../../api/notifications';
-import { setNotifications, markRead, markAllRead, removeNotification } from '../../redux/slices/notificationSlice';
+import { setNotifications, markRead, markAllRead, removeNotification, addNotification } from '../../redux/slices/notificationSlice';
+import { useSocket } from '../../context/SocketContext';
+import { toast } from 'react-toastify';
 
 const BellIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -61,6 +63,34 @@ export default function Navbar() {
         .catch(() => {});
     }
   }, [isAuthenticated, dispatch]);
+
+  // Socket listener for real-time notifications
+  const { socket } = useSocket();
+  useEffect(() => {
+    if (socket) {
+      const handleNewNotif = (notif: any) => {
+        dispatch(addNotification(notif));
+        toast.info(
+          <div>
+            <strong>{notif.title}</strong>
+            <p style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>{notif.message}</p>
+          </div>,
+          {
+            onClick: () => {
+              if (notif.link) navigate(notif.link);
+              notificationsApi.markAsRead(notif._id);
+              dispatch(markRead(notif._id));
+            }
+          }
+        );
+      };
+
+      socket.on('newNotification', handleNewNotif);
+      return () => {
+        socket.off('newNotification', handleNewNotif);
+      };
+    }
+  }, [socket, dispatch, navigate]);
 
   // Close dropdowns on outside click
   useEffect(() => {

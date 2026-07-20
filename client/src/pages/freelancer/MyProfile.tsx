@@ -5,9 +5,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import { freelancerApi } from "../../api/freelancer";
 import { reviewsApi } from "../../api/reviews";
+import { verificationApi } from "../../api/verification";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import StarRating from "../../components/common/StarRating";
 import { type Review, type ClientProfile, type User } from "../../types";
@@ -55,6 +57,30 @@ export default function MyProfile() {
     queryFn: () => reviewsApi.getFreelancerReviews(profile!._id),
     select: (r) => r.data.reviews as Review[],
     enabled: !!profile?._id,
+  });
+
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [portfolioUrl, setPortfolioUrl] = useState('');
+  const [idCardNumber, setIdCardNumber] = useState('');
+  const [idCardUrl, setIdCardUrl] = useState('');
+
+  const { data: verificationData, refetch: refetchVerification } = useQuery({
+    queryKey: ["verification-status"],
+    queryFn: () => verificationApi.getStatus(),
+    select: r => r.data,
+    enabled: !!profile,
+  });
+
+  const submitVerificationMutation = useMutation({
+    mutationFn: (data: { resumeUrl: string; portfolioUrl: string; idCardNumber: string; idCardUrl: string }) =>
+      verificationApi.submit(data),
+    onSuccess: () => {
+      toast.success("Verification request submitted successfully!");
+      refetchVerification();
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to submit verification");
+    },
   });
 
   const {
@@ -413,6 +439,72 @@ export default function MyProfile() {
           </button>
         </form>
       </div>
+
+      {/* Identity Verification Section */}
+      {profile && (
+        <div style={{ marginTop: '2.5rem' }}>
+          <h2 className="section-title" style={{ fontSize: '1.35rem', marginBottom: '1rem' }}>Identity & Credential Verification</h2>
+          <div className="glass" style={{ padding: '1.5rem', borderLeft: profile.verified ? '4px solid #10b981' : '4px solid #f59e0b' }}>
+            {profile.verified ? (
+              <div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#10b981' }}>✓ Account Verified</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '0.875rem', margin: 0 }}>
+                  Your credentials have been successfully approved by the SkillSphere administrators. A verification checkmark has been applied to your profile.
+                </p>
+              </div>
+            ) : verificationData?.request?.status === 'Pending' ? (
+              <div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#f59e0b' }}>⏳ Verification Pending</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '0.875rem', margin: 0 }}>
+                  Your request is currently being reviewed by administrators. This usually takes 1-2 business days.
+                </p>
+                <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>
+                  <div><strong>ID Number:</strong> {verificationData.request.idCardNumber}</div>
+                  <div><strong>Resume:</strong> <a href={verificationData.request.resumeUrl} target="_blank" rel="noreferrer" style={{ color: '#6366f1' }}>View file</a></div>
+                  <div><strong>Portfolio:</strong> <a href={verificationData.request.portfolioUrl} target="_blank" rel="noreferrer" style={{ color: '#6366f1' }}>View link</a></div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#ef4444' }}>⚠️ Verification Required</h3>
+                <p style={{ color: '#cbd5e1', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                  Submit your resume, portfolio link, and government ID card details to obtain the **Verified badge** and increase client trust.
+                </p>
+
+                {verificationData?.request?.status === 'Rejected' && (
+                  <div style={{ padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#f43f5e', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                    <strong>Last Attempt Rejected:</strong> {verificationData.request.rejectionReason || "Credentials did not match."}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="form-group">
+                    <label className="label">Resume / CV File URL</label>
+                    <input type="text" className="input" placeholder="e.g. PDF link in Google Drive / Cloudinary" value={resumeUrl} onChange={e => setResumeUrl(e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">Portfolio Link</label>
+                    <input type="text" className="input" placeholder="e.g. Portfolio site, GitHub, Behance" value={portfolioUrl} onChange={e => setPortfolioUrl(e.target.value)} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                      <label className="label">Govt ID Number (e.g. PAN / Aadhaar / SSN)</label>
+                      <input type="text" className="input" placeholder="Enter ID number" value={idCardNumber} onChange={e => setIdCardNumber(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                      <label className="label">ID Card Document File URL</label>
+                      <input type="text" className="input" placeholder="Link to scanned document copy" value={idCardUrl} onChange={e => setIdCardUrl(e.target.value)} />
+                    </div>
+                  </div>
+                  <button className="btn-primary" style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }} disabled={submitVerificationMutation.isPending || !resumeUrl || !portfolioUrl || !idCardNumber || !idCardUrl} onClick={() => submitVerificationMutation.mutate({ resumeUrl, portfolioUrl, idCardNumber, idCardUrl })}>
+                    {submitVerificationMutation.isPending ? 'Submitting...' : 'Submit Credentials'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Reviews Section */}
       {profile && (

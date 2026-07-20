@@ -4,6 +4,9 @@ import {sendEmail} from "../services/email.service.js";
 import welcomeEmail from "../../templates/welcomeEmail.js";
 import Client from "../models/client.js";
 import Freelancer from "../models/Freelancer.js";
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 
 
@@ -32,21 +35,24 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    // Prevent self-registration as admin — admin accounts must be seeded via script
+    const safeRole = role === "admin" ? "client" : role;
+
     // Create User
     const user = await User.create({
       name,
       email,
       password,
-      role,
+      role: safeRole,
     });
-    if (role === "client") {
+    if (safeRole === "client") {
   await Client.create({
     user: user._id,
     companyName: `${name}'s Company`,
   });
 }
 
-if (role === "freelancer") {
+if (safeRole === "freelancer") {
   await Freelancer.create({
     user: user._id,
   });
@@ -161,4 +167,93 @@ export const logoutUser = async (req, res) => {
     success: true,
     message: "Logged out successfully",
   });
+};
+
+// @desc Google OAuth Login / Register
+// @route POST /api/auth/google
+// @access Public
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential, role } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required",
+      });
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Find existing user by googleId or email
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // Link googleId if user previously registered with email/password
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (picture && !user.avatar) user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // New user — create account
+      const assignedRole = role === "freelancer" ? "freelancer" : "client";
+
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        avatar: picture || "",
+        role: assignedRole,
+      });
+
+      if (assignedRole === "client") {
+        await Client.create({
+          user: user._id,
+          companyName: `${name}'s Company`,
+        });
+      } else {
+        await Freelancer.create({ user: user._id });
+      }
+
+      // Welcome email (non-blocking)
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Welcome to SkillSphere 🎉",
+          html: welcomeEmail(user.name),
+        });
+      } catch (err) {
+        console.error("Email Error:", err.message);
+      }
+    }
+
+    const token = generateToken(user._id, user.role);
+
+    res.status(200).json({
+      success: true,
+      message: "Google authentication successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error("Google Auth Error:", error.message);
+    res.status(401).json({
+      success: false,
+      message: "Google authentication failed",
+    });
+  }
 };

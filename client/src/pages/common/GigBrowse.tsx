@@ -13,15 +13,19 @@ export default function GigBrowse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
+  const [skill, setSkill] = useState(searchParams.get('skill') || '');
+  const [experience, setExperience] = useState(searchParams.get('experience') || '');
   const [minBudget, setMinBudget] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['gigs', { search, category, minBudget, maxBudget, page }],
+    queryKey: ['gigs', { search, category, skill, experience, minBudget, maxBudget, page }],
     queryFn: () => gigsApi.getAll({
       search: search || undefined,
       category: category || undefined,
+      skill: skill || undefined,
+      experience: experience || undefined,
       minBudget: minBudget ? Number(minBudget) : undefined,
       maxBudget: maxBudget ? Number(maxBudget) : undefined,
       page,
@@ -30,14 +34,19 @@ export default function GigBrowse() {
     select: r => r.data,
   });
 
-  const gigs: Gig[] = data?.gigs || [];
+  const gigs: Gig[] = data?.results || data?.gigs || []; // Account for search vs normal gigs response
   const totalPages: number = data?.totalPages || 1;
   const total: number = data?.total || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    setSearchParams({ ...(search && { search }), ...(category && { category }) });
+    setSearchParams({ 
+      ...(search && { search }), 
+      ...(category && { category }),
+      ...(skill && { skill }),
+      ...(experience && { experience })
+    });
   };
 
   return (
@@ -53,7 +62,7 @@ export default function GigBrowse() {
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '1.25rem' }}>Filters</h3>
 
           <div className="form-group">
-            <label className="label">Search</label>
+            <label className="label">Search Keywords</label>
             <form onSubmit={handleSearch}>
               <input
                 id="gig-search-input"
@@ -67,6 +76,18 @@ export default function GigBrowse() {
           </div>
 
           <div className="form-group">
+            <label className="label">Skills (comma separated)</label>
+            <input
+              id="gig-skill-input"
+              type="text"
+              className="input"
+              placeholder="e.g. React, Node.js"
+              value={skill}
+              onChange={e => { setSkill(e.target.value); setPage(1); }}
+            />
+          </div>
+
+          <div className="form-group">
             <label className="label">Category</label>
             <select
               id="gig-category-filter"
@@ -75,6 +96,18 @@ export default function GigBrowse() {
               onChange={e => { setCategory(e.target.value); setPage(1); }}
             >
               {CATEGORIES.map(c => <option key={c} value={c}>{c || 'All Categories'}</option>)}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="label">Experience Level</label>
+            <select
+              id="gig-experience-filter"
+              className="select"
+              value={experience}
+              onChange={e => { setExperience(e.target.value); setPage(1); }}
+            >
+              {EXP_LEVELS.map(e => <option key={e} value={e}>{e || 'Any Level'}</option>)}
             </select>
           </div>
 
@@ -105,13 +138,13 @@ export default function GigBrowse() {
           <button
             id="apply-filters-btn"
             className="btn-primary"
-            onClick={() => setPage(1)}
+            onClick={handleSearch}
             style={{ width: '100%' }}
           >Apply Filters</button>
 
           <button
             className="btn-secondary"
-            onClick={() => { setSearch(''); setCategory(''); setMinBudget(''); setMaxBudget(''); setPage(1); }}
+            onClick={() => { setSearch(''); setCategory(''); setSkill(''); setExperience(''); setMinBudget(''); setMaxBudget(''); setPage(1); setSearchParams({}); }}
             style={{ width: '100%', marginTop: '0.75rem' }}
           >Clear All</button>
         </div>

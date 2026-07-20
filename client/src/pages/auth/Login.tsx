@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../hooks/useAuth';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
 
 interface LoginForm {
   email: string;
@@ -49,6 +50,16 @@ export default function Login() {
         </div>
 
         <div className="glass-strong" style={{ padding: '2rem' }}>
+          {/* Google Button */}
+          <GoogleAuthButton label="Continue with Google" />
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
+            <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-faint)', whiteSpace: 'nowrap' }}>or sign in with email</span>
+            <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)}>
             {error && (
               <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1.25rem', color: '#ef4444', fontSize: '0.875rem' }}>
@@ -118,3 +129,4 @@ export default function Login() {
     </div>
   );
 }
+

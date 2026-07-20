@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
 
 interface RegisterForm {
   name: string;
@@ -82,6 +83,18 @@ export default function Register() {
               </div>
             </div>
 
+            {/* Google Button (uses selected role) */}
+            <div className="form-group">
+              <GoogleAuthButton role={selectedRole} label="Sign up with Google" />
+            </div>
+
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-faint)', whiteSpace: 'nowrap' }}>or register with email</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+            </div>
+
             <div className="form-group">
               <label className="label" htmlFor="reg-name">Full Name</label>
               <input
@@ -155,3 +168,4 @@ export default function Register() {
     </div>
   );
 }
+

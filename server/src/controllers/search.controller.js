@@ -133,24 +133,20 @@ sort="newest"
 const query={};
 
 if(keyword){
-
-query.title={
-$regex:keyword,
-$options:"i"
-};
-
+  query.$or = [
+    { title: { $regex: keyword, $options: "i" } },
+    { description: { $regex: keyword, $options: "i" } }
+  ];
 }
 
 if(category){
-
-query.category=category;
-
+  query.category = category;
 }
 
 if(skill){
-
-query.skills={$in:[skill]};
-
+  // Handle if skill is a comma-separated list
+  const skillsArray = skill.split(',').map(s => s.trim());
+  query.skills = { $in: skillsArray };
 }
 
 if(experience){

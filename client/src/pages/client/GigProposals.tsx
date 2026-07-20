@@ -6,6 +6,7 @@ import { gigsApi } from '../../api/gigs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
 import PaymentModal from '../../components/common/PaymentModal';
+import AITalentRecommendations from '../../components/client/AITalentRecommendations';
 import { type Proposal } from '../../types';
 
 export default function GigProposals() {
@@ -13,6 +14,7 @@ export default function GigProposals() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
+  const [activeTab, setActiveTab] = useState<'proposals' | 'ai-matches'>('proposals');
   const [payingProposal, setPayingProposal] = useState<Proposal | null>(null);
 
   const { data: gig } = useQuery({
@@ -69,11 +71,43 @@ export default function GigProposals() {
       {gig && (
         <div style={{ marginBottom: '2rem' }}>
           <h1 className="section-title">{gig.title}</h1>
-          <p className="section-subtitle">Review and manage proposals for this gig</p>
+          <p className="section-subtitle">Review proposals or find AI recommended talent</p>
+          
+          <div style={{ 
+            display: 'flex', gap: '1rem', marginTop: '1.5rem', 
+            borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' 
+          }}>
+            <button
+              onClick={() => setActiveTab('proposals')}
+              style={{
+                background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer',
+                fontSize: '0.95rem', fontWeight: 600,
+                color: activeTab === 'proposals' ? 'var(--color-text)' : 'var(--color-text-muted)',
+                borderBottom: activeTab === 'proposals' ? '2px solid #6366f1' : '2px solid transparent',
+                marginBottom: '-0.5rem', transition: 'all 0.2s'
+              }}
+            >
+              Received Proposals ({proposals?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('ai-matches')}
+              style={{
+                background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer',
+                fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem',
+                color: activeTab === 'ai-matches' ? '#a855f7' : 'var(--color-text-muted)',
+                borderBottom: activeTab === 'ai-matches' ? '2px solid #a855f7' : '2px solid transparent',
+                marginBottom: '-0.5rem', transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.1rem' }}>✨</span> AI Talent Matches
+            </button>
+          </div>
         </div>
       )}
 
-      {isLoading ? (
+      {activeTab === 'ai-matches' ? (
+        <AITalentRecommendations gigId={id!} />
+      ) : isLoading ? (
         <LoadingSpinner />
       ) : !proposals || proposals.length === 0 ? (
         <div className="empty-state glass">

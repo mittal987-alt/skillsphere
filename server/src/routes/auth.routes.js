@@ -5,6 +5,7 @@ import {
   loginUser,
   logoutUser,
   getMe,
+  googleAuth,
 } from "../controllers/auth.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
@@ -19,4 +20,6 @@ router.post("/logout", logoutUser);
 
 router.get("/me", protect, getMe);
 
-export default router;
+router.post("/google", googleAuth);
+
+export default router;

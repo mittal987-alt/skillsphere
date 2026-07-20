@@ -59,6 +59,11 @@ export default function ManageGigs() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
+                {(gig.status === 'In Progress' || gig.status === 'Completed') && (
+                  <Link to={`/gigs/${gig._id}/tracker`} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                    Track Progress
+                  </Link>
+                )}
                 <Link to={`/client/gigs/${gig._id}/proposals`} className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
                   Proposals
                 </Link>

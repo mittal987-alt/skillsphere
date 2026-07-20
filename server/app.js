@@ -23,6 +23,9 @@ import analyticsRoutes from "./src/routes/analytics.routes.js";
 import aiRoutes from "./src/routes/ai.routes.js";
 import cloudinaryRoutes from "./src/routes/cloudinary.routes.js";
 import messageRoutes from "./src/routes/message.routes.js";
+import milestoneRoutes from "./src/routes/milestone.routes.js";
+import disputeRoutes from "./src/routes/dispute.routes.js";
+import verificationRoutes from "./src/routes/verification.routes.js";
 
 const app = express();
 
@@ -48,5 +51,8 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/upload", cloudinaryRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/milestones", milestoneRoutes);
+app.use("/api/disputes", disputeRoutes);
+app.use("/api/verification", verificationRoutes);
 
 export default app;

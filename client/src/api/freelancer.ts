@@ -15,4 +15,7 @@ export const freelancerApi = {
 
   getById: (id: string) =>
     api.get(`/freelancers/${id}`),
+
+  getAnalyticsDashboard: () => 
+    api.get('/freelancers/analytics/dashboard'),
 };
