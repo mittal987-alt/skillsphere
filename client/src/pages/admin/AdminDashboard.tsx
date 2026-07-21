@@ -160,6 +160,8 @@ export default function AdminDashboard() {
                   { label: '⚠️ Mediate Disputes', to: '/admin/disputes', color: '#f59e0b' },
                   { label: '🪪 Verify Freelancers', to: '/admin/verification', color: '#10b981' },
                   { label: '📊 Analytics', to: '/admin/analytics', color: '#8b5cf6' },
+                  { label: '💹 Payments Analytics', to: '/admin/payments-analytics', color: '#10b981' },
+                  { label: '📝 Reviews Analytics', to: '/admin/reviews-analytics', color: '#f43f5e' },
                 ].map(action => (
                   <Link
                     key={action.to}

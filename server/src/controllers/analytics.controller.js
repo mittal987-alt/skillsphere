@@ -348,3 +348,31 @@ export const platformStatistics = async (req, res) => {
     });
   }
 };
+
+// ======================================
+// Monthly Reviews
+// GET /api/analytics/reviews
+// ======================================
+
+export const monthlyReviews = async (req, res) => {
+  try {
+    const reviews = await Review.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 },
+      },
+    ]);
+
+    res.status(200).json({ success: true, reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

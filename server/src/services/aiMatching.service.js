@@ -1,7 +1,8 @@
 import { Mistral } from "@mistralai/mistralai";
 
-const client = process.env.MISTRAL_API_KEY
-  ? new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
+const mistralApiKey = process.env.MISTRAL_API_KEY ? String(process.env.MISTRAL_API_KEY).trim() : '';
+const client = mistralApiKey
+  ? new Mistral({ apiKey: mistralApiKey })
   : null;
 
 /**

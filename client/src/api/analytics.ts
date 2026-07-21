@@ -4,6 +4,7 @@ export const analyticsApi = {
   getDashboard: () => api.get('/analytics/dashboard'),
   getMonthlyRevenue: () => api.get('/analytics/revenue'),
   getMonthlyUsers: () => api.get('/analytics/users'),
+  getMonthlyReviews: () => api.get('/analytics/reviews'),
   getTopFreelancers: () => api.get('/analytics/top-freelancers'),
   getTopClients: () => api.get('/analytics/top-clients'),
   getTopSkills: () => api.get('/analytics/top-skills'),

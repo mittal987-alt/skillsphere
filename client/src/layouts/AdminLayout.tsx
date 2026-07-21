@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { ReactNode } from 'react';
 
@@ -97,7 +97,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleLogout = async () => {
     await logoutUser();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -140,6 +140,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
             </div>
           )}
+          {/* Add quick access to public Browse Gigs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link to="/gigs" onClick={() => {}} style={{ textDecoration: 'none', color: 'var(--color-text-faint)', fontSize: '0.9rem', padding: '6px 10px', borderRadius: 8, border: '1px solid transparent' }}>
+              Browse Gigs
+            </Link>
+          </div>
           {!sidebarOpen && (
             <div style={{
               width: 32, height: 32, borderRadius: 8, margin: '0 auto',

@@ -135,8 +135,13 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Nav Links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="desktop-nav">
+        {/* Desktop Nav Links + Global Search */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="desktop-nav">
+          <form onSubmit={(e) => { e.preventDefault(); const q = new FormData(e.currentTarget as HTMLFormElement).get('q') as string; if (q && q.trim()) navigate(`/gigs?search=${encodeURIComponent(q.trim())}`); }} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input name="q" placeholder="Search gigs, skills…" aria-label="Search" style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-surface)', color: 'var(--color-text)', width: 260 }} />
+            <button type="submit" className="btn-secondary" style={{ padding: '6px 10px' }}>Search</button>
+          </form>
+
           <NavLink to="/gigs" style={({ isActive }) => ({
             color: isActive ? 'var(--color-nav-link-active)' : 'var(--color-nav-link)', textDecoration: 'none',
             fontWeight: 500, fontSize: '0.9rem', transition: 'color 0.2s',
@@ -154,6 +159,27 @@ export default function Navbar() {
               color: isActive ? 'var(--color-nav-link-active)' : 'var(--color-nav-link)', textDecoration: 'none',
               fontWeight: 500, fontSize: '0.9rem',
             })}>Messages</NavLink>
+          )}
+
+          {/* role-specific quick links */}
+          {isAuthenticated && user?.role === 'admin' && (
+            <>
+              <NavLink to="/admin/payments" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Payments</NavLink>
+              <NavLink to="/admin/reviews" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Reviews</NavLink>
+              <NavLink to="/admin/analytics" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Analytics</NavLink>
+            </>
+          )}
+          {isAuthenticated && user?.role === 'freelancer' && (
+            <>
+              <NavLink to="/freelancer/earnings" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Earnings</NavLink>
+              <NavLink to="/freelancer/analytics" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Analytics</NavLink>
+            </>
+          )}
+          {isAuthenticated && user?.role === 'client' && (
+            <>
+              <NavLink to="/client/payments" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Payments</NavLink>
+              <NavLink to="/client/gigs/new" style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Post Gig</NavLink>
+            </>
           )}
         </div>
 
@@ -305,11 +331,12 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile menu toggle */}
+          {/* Mobile menu toggle (always visible for easier access) */}
           <button
             onClick={() => setMobileOpen(v => !v)}
-            style={{ background: 'none', border: 'none', color: 'var(--color-nav-link)', cursor: 'pointer', padding: 4, display: 'none' }}
+            style={{ background: 'none', border: 'none', color: 'var(--color-nav-link)', cursor: 'pointer', padding: 4, display: 'block' }}
             className="mobile-menu-btn"
+            aria-label="Toggle menu"
           >
             {mobileOpen ? <XIcon /> : <MenuIcon />}
           </button>
@@ -319,11 +346,34 @@ export default function Navbar() {
       {/* Mobile dropdown */}
       {mobileOpen && (
         <div style={{ background: 'var(--color-dropdown-bg)', borderTop: '1px solid var(--color-dropdown-divider)', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={(e) => { e.preventDefault(); const q = new FormData(e.currentTarget as HTMLFormElement).get('q') as string; setMobileOpen(false); if (q && q.trim()) navigate(`/gigs?search=${encodeURIComponent(q.trim())}`); }}>
+            <input name="q" placeholder="Search gigs, skills…" aria-label="Search" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-surface)', color: 'var(--color-text)', width: '100%' }} />
+          </form>
           <Link to="/gigs" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Browse Gigs</Link>
           {isAuthenticated ? (
             <>
               <Link to={dashboardLink()} onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
               <Link to="/chat" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Messages</Link>
+              {user?.role === 'admin' && (
+                <>
+                  <Link to="/admin/payments" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Payments</Link>
+                  <Link to="/admin/reviews" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Reviews</Link>
+                  <Link to="/admin/analytics" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Analytics</Link>
+                </>
+              )}
+              {user?.role === 'freelancer' && (
+                <>
+                  <Link to="/freelancer/earnings" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Earnings</Link>
+                  <Link to="/freelancer/analytics" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Analytics</Link>
+                </>
+              )}
+              {user?.role === 'client' && (
+                <>
+                  <Link to="/client/payments" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Payments</Link>
+                  <Link to="/client/gigs/new" onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>Post Gig</Link>
+                </>
+              )}
+              <Link to={user?.role === 'client' ? '/client/profile' : user?.role === 'freelancer' ? '/freelancer/profile' : '/'} onClick={() => setMobileOpen(false)} style={{ color: 'var(--color-nav-link)', textDecoration: 'none', fontWeight: 500 }}>My Profile</Link>
               <button onClick={() => { handleLogout(); setMobileOpen(false); }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', textAlign: 'left', fontWeight: 500, padding: 0 }}>Sign Out</button>
             </>
           ) : (

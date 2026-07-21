@@ -22,6 +22,7 @@ import ManageGigs from './pages/client/ManageGigs';
 import EditGig from './pages/client/EditGig';
 import GigProposals from './pages/client/GigProposals';
 import ClientPayments from './pages/client/ClientPayments';
+import ClientMyProfile from './pages/client/MyProfile';
 
 // Freelancer Pages
 import FreelancerDashboard from './pages/freelancer/FreelancerDashboard';
@@ -37,6 +38,10 @@ import ChatPage from './pages/chat/ChatPage';
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
+import PaymentsAnalytics from './pages/admin/PaymentsAnalytics';
+import ReviewsAnalytics from './pages/admin/ReviewsAnalytics';
+import AdminPayments from './pages/admin/AdminPayments';
+import AdminReviews from './pages/admin/AdminReviews';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminGigs from './pages/admin/AdminGigs';
 import AdminDisputes from './pages/admin/AdminDisputes';
@@ -67,6 +72,7 @@ export default function AppRoutes() {
 
       {/* Client Routes */}
       <Route path="/client/dashboard" element={<ClientDashboard />} />
+      <Route path="/client/profile" element={<ProtectedRoute allowedRoles={['client']}><ClientMyProfile /></ProtectedRoute>} />
       <Route path="/client/gigs" element={<ProtectedRoute allowedRoles={['client']}><ManageGigs /></ProtectedRoute>} />
       <Route path="/client/gigs/new" element={<ProtectedRoute allowedRoles={['client']}><PostGig /></ProtectedRoute>} />
       <Route path="/client/gigs/:id/edit" element={<ProtectedRoute allowedRoles={['client']}><EditGig /></ProtectedRoute>} />
@@ -88,6 +94,10 @@ export default function AppRoutes() {
       {/* Admin Routes */}
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><AnalyticsDashboard /></ProtectedRoute>} />
+      <Route path="/admin/payments-analytics" element={<ProtectedRoute allowedRoles={['admin']}><PaymentsAnalytics /></ProtectedRoute>} />
+      <Route path="/admin/reviews-analytics" element={<ProtectedRoute allowedRoles={['admin']}><ReviewsAnalytics /></ProtectedRoute>} />
+      <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={['admin']}><AdminPayments /></ProtectedRoute>} />
+      <Route path="/admin/reviews" element={<ProtectedRoute allowedRoles={['admin']}><AdminReviews /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/gigs" element={<ProtectedRoute allowedRoles={['admin']}><AdminGigs /></ProtectedRoute>} />
       <Route path="/admin/disputes" element={<ProtectedRoute allowedRoles={['admin']}><AdminDisputes /></ProtectedRoute>} />

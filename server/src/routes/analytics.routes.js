@@ -6,7 +6,9 @@ monthlyRevenue,
 monthlyUsers,
 topFreelancers,
 topClients,
-topSkills
+topSkills,
+platformStatistics,
+monthlyReviews
 } from "../controllers/analytics.controller.js";
 
 import {protect} from "../middleware/auth.middleware.js";
@@ -30,5 +32,9 @@ router.get("/top-freelancers",topFreelancers);
 router.get("/top-clients",topClients);
 
 router.get("/top-skills",topSkills);
+
+router.get("/platform", platformStatistics);
+
+router.get('/reviews', monthlyReviews);
 
 export default router;
