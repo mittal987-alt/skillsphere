@@ -1,5 +1,10 @@
 import express from "express";
-import { recommendFreelancers, recommendGigs } from "../controllers/ai.controller.js";
+import {
+  recommendFreelancers,
+  recommendGigs,
+  generateCoverLetter,
+  enhanceGig,
+} from "../controllers/ai.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { authorize } from "../middleware/role.middleware.js";
 
@@ -10,5 +15,11 @@ router.get("/recommend/:gigId", protect, authorize("client"), recommendFreelance
 
 // Freelancer: Get AI-recommended gigs based on profile
 router.get("/gig-recommendations", protect, authorize("freelancer"), recommendGigs);
+
+// Freelancer: Generate AI Cover Letter / Proposal text
+router.post("/generate-cover-letter", protect, authorize("freelancer"), generateCoverLetter);
+
+// Client: Enhance Gig description & recommend skill tags
+router.post("/enhance-gig-description", protect, authorize("client"), enhanceGig);
 
 export default router;

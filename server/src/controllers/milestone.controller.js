@@ -174,6 +174,13 @@ export const approveMilestone = async (req, res) => {
     // Mark milestone as completed
     milestone.status = "Completed";
     milestone.completed = true;
+
+    // If all milestones are completed, mark gig as Completed
+    const allMilestonesCompleted = gig.milestones.every(m => m.status === "Completed");
+    if (allMilestonesCompleted) {
+      gig.status = "Completed";
+    }
+
     await gig.save();
 
     // Release funds: find the Escrow payment and update it to "Released"

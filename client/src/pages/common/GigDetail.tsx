@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { gigsApi } from '../../api/gigs';
 import { proposalsApi } from '../../api/proposals';
 import { reviewsApi } from '../../api/reviews';
+import { generateAICoverLetter } from '../../api/ai';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StarRating from '../../components/common/StarRating';
@@ -31,6 +32,7 @@ export default function GigDetail() {
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [error, setError] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   const { data: gigData, isLoading } = useQuery({
     queryKey: ['gig', id],
@@ -46,7 +48,22 @@ export default function GigDetail() {
     enabled: !!id,
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProposalForm>();
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ProposalForm>();
+
+  const handleGenerateCoverLetter = async () => {
+    if (!id) return;
+    setIsGeneratingAI(true);
+    try {
+      const res = await generateAICoverLetter(id);
+      if (res.coverLetter) {
+        setValue('coverLetter', res.coverLetter);
+      }
+    } catch (err: any) {
+      console.error('Failed to generate cover letter with AI:', err);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const submitMutation = useMutation({
     mutationFn: (data: ProposalForm) =>
@@ -111,7 +128,7 @@ export default function GigDetail() {
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Required Skills</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {gig.skills.map(s => (
+              {gig.skills.map((s: string) => (
                 <span key={s} style={{ padding: '5px 14px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 999, fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 500 }}>{s}</span>
               ))}
             </div>
@@ -149,7 +166,7 @@ export default function GigDetail() {
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Milestones</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {gig.milestones.map((m, i) => (
+              {gig.milestones.map((m: any, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div>
                     <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem' }}>{m.title}</div>
@@ -182,7 +199,31 @@ export default function GigDetail() {
               </button>
             ) : (
               <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14 }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '1.25rem' }}>Submit Your Proposal</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>Submit Your Proposal</h3>
+                  <button
+                    type="button"
+                    onClick={handleGenerateCoverLetter}
+                    disabled={isGeneratingAI}
+                    style={{
+                      background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      opacity: isGeneratingAI ? 0.7 : 1,
+                    }}
+                  >
+                    <span>✨</span>
+                    {isGeneratingAI ? 'Generating AI Proposal...' : 'Generate AI Proposal'}
+                  </button>
+                </div>
                 <form onSubmit={handleSubmit(d => submitMutation.mutate(d))}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
@@ -229,7 +270,7 @@ export default function GigDetail() {
         <div className="glass" style={{ padding: '1.75rem' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '1.25rem' }}>Reviews ({reviews.length})</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {reviews.map(r => (
+            {reviews.map((r: any) => (
               <div key={r._id} style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <StarRating rating={r.rating} size={14} />

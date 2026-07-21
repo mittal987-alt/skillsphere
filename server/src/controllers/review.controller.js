@@ -37,11 +37,27 @@ export const createReview = async (req, res) => {
       });
     }
 
-    if (gig.status !== "Completed") {
+    // Allow review if gig is Completed OR has a Paid/Released payment OR completed milestones
+    const payment = await Payment.findOne({
+      gig: gigId,
+      status: { $in: ["Paid", "Released"] },
+    });
+
+    const allMilestonesCompleted = gig.milestones && gig.milestones.length > 0
+      ? gig.milestones.every(m => m.status === "Completed")
+      : false;
+
+    if (gig.status !== "Completed" && !payment && !allMilestonesCompleted) {
       return res.status(400).json({
         success: false,
-        message: "Review can only be added after project completion",
+        message: "Review can only be added after project completion or payment release",
       });
+    }
+
+    // Ensure gig status is set to Completed
+    if (gig.status !== "Completed") {
+      gig.status = "Completed";
+      await gig.save();
     }
 
     const alreadyReviewed = await Review.findOne({
@@ -56,20 +72,40 @@ export const createReview = async (req, res) => {
       });
     }
 
+    // Find proposal for this gig
     const proposal = await Proposal.findOne({
       gig: gigId,
-      status: "Accepted",
+      status: { $in: ["Accepted", "Approved", "Completed"] },
     });
 
-    const freelancer = await Freelancer.findById(
-      proposal.freelancer
-    ).populate("user");
+    let freelancerId = proposal?.freelancer;
+
+    // Fallback if proposal query didn't match: get freelancer from payment
+    if (!freelancerId && payment) {
+      freelancerId = payment.freelancer;
+    }
+
+    if (!freelancerId) {
+      return res.status(404).json({
+        success: false,
+        message: "Associated freelancer profile not found for this gig",
+      });
+    }
+
+    const freelancer = await Freelancer.findById(freelancerId).populate("user");
+
+    if (!freelancer) {
+      return res.status(404).json({
+        success: false,
+        message: "Freelancer profile not found",
+      });
+    }
 
     const newReview = await Review.create({
       gig: gigId,
       client: client._id,
       freelancer: freelancer._id,
-      rating,
+      rating: Number(rating),
       review,
     });
 
@@ -77,30 +113,26 @@ export const createReview = async (req, res) => {
       freelancer: freelancer._id,
     });
 
-    const averageRating =
-      reviews.reduce((sum, r) => sum + r.rating, 0) /
-      reviews.length;
+    const totalSum = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = totalSum / reviews.length;
 
-    freelancer.averageRating = averageRating;
+    freelancer.averageRating = Math.round(averageRating * 10) / 10;
     freelancer.totalReviews = reviews.length;
 
     await freelancer.save();
 
-    await createNotification(
-      freelancer.user._id,
-      "New Review",
-      "A client has left you a review.",
-      "Review",
-      "/freelancer/reviews"
-    );
+    try {
+      if (freelancer?.user?.email) {
+        await sendEmail({
+          to: freelancer.user.email,
+          subject: "New Review",
+          html: reviewEmail(rating),
+        });
+      }
+    } catch (emailError) {
+      console.warn("Failed to send review email notification:", emailError.message);
+    }
 
-  
-
-await sendEmail({
-  to: freelancer.user.email,
-  subject: "New Review",
-  html: reviewEmail(rating),
-});
     res.status(201).json({
       success: true,
       message: "Review submitted successfully",

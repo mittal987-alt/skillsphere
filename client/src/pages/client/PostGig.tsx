@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { gigsApi } from '../../api/gigs';
+import { enhanceGigDescription } from '../../api/ai';
 
 interface GigForm {
   title: string;
@@ -20,12 +21,45 @@ const CATEGORIES = ['Design', 'Development', 'Writing', 'Marketing', 'Video', 'D
 export default function PostGig() {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [isEnhancingAI, setIsEnhancingAI] = useState(false);
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<GigForm>({
+  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<GigForm>({
     defaultValues: { experienceLevel: 'Intermediate', milestones: [] }
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: 'milestones' });
+
+  const titleValue = watch('title');
+  const descriptionValue = watch('description');
+  const categoryValue = watch('category');
+
+  const handleEnhanceWithAI = async () => {
+    if (!titleValue || !descriptionValue) {
+      setError('Please provide at least a title and a basic description before enhancing with AI.');
+      return;
+    }
+    setError('');
+    setIsEnhancingAI(true);
+    try {
+      const res = await enhanceGigDescription({
+        title: titleValue,
+        description: descriptionValue,
+        category: categoryValue,
+      });
+
+      if (res.enhancedDescription) {
+        setValue('description', res.enhancedDescription);
+      }
+      if (res.recommendedSkills && Array.isArray(res.recommendedSkills) && res.recommendedSkills.length > 0) {
+        setValue('skills', res.recommendedSkills.join(', '));
+      }
+    } catch (err: any) {
+      console.error('Failed to enhance gig description:', err);
+      setError('Failed to contact AI service for enhancement.');
+    } finally {
+      setIsEnhancingAI(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: (data: GigForm) => {
@@ -46,8 +80,12 @@ export default function PostGig() {
         Back
       </button>
 
-      <h1 className="section-title">Post a New Gig</h1>
-      <p className="section-subtitle">Describe what you need and find the perfect freelancer</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 className="section-title">Post a New Gig</h1>
+          <p className="section-subtitle">Describe what you need and find the perfect freelancer</p>
+        </div>
+      </div>
 
       <div className="glass" style={{ padding: '2rem' }}>
         {error && (
@@ -65,7 +103,31 @@ export default function PostGig() {
           </div>
 
           <div className="form-group">
-            <label className="label" htmlFor="gig-description">Description *</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label className="label" htmlFor="gig-description" style={{ margin: 0 }}>Description *</label>
+              <button
+                type="button"
+                onClick={handleEnhanceWithAI}
+                disabled={isEnhancingAI || !titleValue || !descriptionValue}
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.775rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  opacity: isEnhancingAI || !titleValue || !descriptionValue ? 0.6 : 1,
+                }}
+              >
+                <span>✨</span>
+                {isEnhancingAI ? 'AI Optimizing...' : 'Enhance & Extract Skills with AI'}
+              </button>
+            </div>
             <textarea id="gig-description" className="textarea" placeholder="Describe the project, goals, deliverables..."
               {...register('description', { required: 'Description is required', minLength: { value: 30, message: 'Min 30 characters' } })} style={{ minHeight: 160 }} />
             {errors.description && <span className="error-text">{errors.description.message}</span>}

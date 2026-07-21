@@ -25,6 +25,13 @@ export default function ReviewModal({ gigId, freelancerId, freelancerName, gigTi
       toast.success('Review submitted successfully!');
       qc.invalidateQueries({ queryKey: ['client-payments'] });
       qc.invalidateQueries({ queryKey: ['freelancer-reviews'] });
+      qc.invalidateQueries({ queryKey: ['freelancer-profile'] });
+      qc.invalidateQueries({ queryKey: ['freelancer-dashboard'] });
+      qc.invalidateQueries({ queryKey: ['gig-reviews'] });
+      qc.invalidateQueries({ queryKey: ['gig'] });
+      qc.invalidateQueries({ queryKey: ['gigs'] });
+      qc.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      qc.invalidateQueries({ queryKey: ['admin-reviews'] });
       onSuccess();
     },
     onError: (error: any) => {
