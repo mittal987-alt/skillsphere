@@ -3,6 +3,7 @@ import Client from "../models/client.js";
 import Freelancer from "../models/Freelancer.js";
 import Gig from "../models/Gig.js";
 import Proposal from "../models/Proposal.js";
+import Payment from "../models/payment.js";
 import createNotification from "../utils/createNotification.js";
 import reviewEmail from "../../templates/reviewEmail.js";
 import { sendEmail } from "../services/email.service.js";
