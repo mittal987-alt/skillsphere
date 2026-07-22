@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { paymentsApi } from '../../api/payments';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { type Payment, type FreelancerProfile, type User } from '../../types';
@@ -31,9 +31,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function ClientPayments() {
-  const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
-  const [releasingId, setReleasingId] = useState<string | null>(null);
   const [reviewPayment, setReviewPayment] = useState<Payment | null>(null);
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 

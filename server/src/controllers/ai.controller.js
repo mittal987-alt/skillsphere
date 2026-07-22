@@ -8,6 +8,16 @@ import {
   enhanceGigDescription,
 } from "../services/aiMatching.service.js";
 
+// Simple status check for Mistral configuration
+export const aiStatus = async (req, res) => {
+  try {
+    const configured = Boolean(process.env.MISTRAL_API_KEY && String(process.env.MISTRAL_API_KEY).trim());
+    res.json({ success: true, mistralConfigured: configured });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    AI-recommend top freelancers for a gig (Client use)
 // @route   GET /api/ai/recommend/:gigId
 // @access  Private (Client)

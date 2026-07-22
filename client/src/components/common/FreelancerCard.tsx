@@ -1,4 +1,4 @@
-import { FreelancerProfile } from '../../types';
+import type { FreelancerProfile } from '../../types';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 

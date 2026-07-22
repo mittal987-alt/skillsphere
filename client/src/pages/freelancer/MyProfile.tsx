@@ -12,7 +12,7 @@ import { reviewsApi } from "../../api/reviews";
 import { verificationApi } from "../../api/verification";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import StarRating from "../../components/common/StarRating";
-import { type Review, type ClientProfile, type User } from "../../types";
+import { type Review } from "../../types";
 
 interface ProfileForm {
   title: string;
@@ -548,7 +548,7 @@ export default function MyProfile() {
                       <StarRating rating={r.rating} size={15} />
                     </div>
                     <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
-                      "{r.review}"
+                      "{r.comment}"
                     </p>
                   </div>
                 );

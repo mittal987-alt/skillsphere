@@ -197,10 +197,9 @@ export default function ChatPage() {
             {/* Messages */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {msgsLoading ? <LoadingSpinner /> : messages.map((msg, i) => {
-                const isMe = typeof msg.sender === 'object' ? msg.sender._id === user?.id : msg.sender === user?.id;
-                // handle case where backend might not populate sender properly in all cases
-                const actualSender = (typeof msg.sender === 'object') ? msg.sender : { _id: msg.sender };
-                const actuallyIsMe = actualSender._id === user?.id || (actualSender as any).id === user?.id;
+                // determine sender id robustly whether backend returns id or _id or just string
+                const senderId = typeof msg.sender === 'object' ? ((msg.sender as any).id || (msg.sender as any)._id) : msg.sender;
+                const actuallyIsMe = senderId === user?.id;
 
                 return (
                   <div key={msg._id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: actuallyIsMe ? 'flex-end' : 'flex-start' }}>

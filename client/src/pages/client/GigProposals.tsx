@@ -44,13 +44,7 @@ export default function GigProposals() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['proposals', 'gig', id] }),
   });
 
-  const approveMutation = useMutation({
-    mutationFn: (proposalId: string) => proposalsApi.approveJob(proposalId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['proposals', 'gig', id] });
-      qc.invalidateQueries({ queryKey: ['client-gigs'] });
-    },
-  });
+  
 
   const getFreelancerInfo = (proposal: Proposal) => {
     const freelancer = typeof proposal.freelancer === 'object' ? proposal.freelancer : null;
@@ -250,7 +244,7 @@ export default function GigProposals() {
         return (
           <PaymentModal
             proposalId={payingProposal._id}
-            gigId={payingProposal.gig}
+            gigId={typeof payingProposal.gig === 'object' ? payingProposal.gig._id : payingProposal.gig}
             amount={payingProposal.bidAmount}
             freelancerName={freelancerUser?.name || 'Freelancer'}
             gigTitle={gig?.title || 'Gig'}
