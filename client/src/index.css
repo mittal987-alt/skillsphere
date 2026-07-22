@@ -285,6 +285,20 @@ body::before {
   background: rgba(239, 68, 68, 0.2);
 }
 
+/* Responsive navbar */
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+
 /* Form input */
 .input {
   width: 100%;
