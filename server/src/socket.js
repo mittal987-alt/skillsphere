@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 
 let io;
@@ -11,6 +12,23 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    const token = socket.handshake.auth?.token;
+    const jwtSecret = process.env.JWT_SECRET || "dev_secret";
+
+    if (!token) {
+      console.log("Socket connection rejected: missing token");
+      socket.disconnect();
+      return;
+    }
+
+    try {
+      jwt.verify(token, jwtSecret);
+    } catch (error) {
+      console.log("Socket auth failed:", error.message);
+      socket.disconnect();
+      return;
+    }
+
     console.log("User Connected:", socket.id);
 
     // Users can join their personal room for notifications

@@ -15,19 +15,20 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     // Only connect if the user is authenticated
-    if (!user) return;
+    if (!user || !token) return;
 
     // Use Vite env var or default
     const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
     
     const socketInstance = io(SOCKET_URL, {
       withCredentials: true,
+      auth: { token },
     });
 
     socketInstance.on('connect', () => {

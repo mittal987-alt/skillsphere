@@ -2,18 +2,25 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatApi } from '../../api/chat';
 import { useAuth } from '../../hooks/useAuth';
-import { useSocket } from '../../hooks/useSocket';
+import { useSocket } from '../../context/SocketContext';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import {type Conversation,type Message } from '../../types';
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const socket = useSocket();
+  const { socket } = useSocket();
   const qc = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+
+  const mergeMessage = (existing: Message[] | undefined, incoming: Message) => {
+    if (!incoming?._id) return existing ? [...existing, incoming] : [incoming];
+    const alreadyExists = existing?.some((message) => message._id === incoming._id);
+    if (alreadyExists) return existing ?? [];
+    return [...(existing ?? []), incoming];
+  };
 
   // Fetch conversations
   const { data: convData, isLoading: convLoading } = useQuery({
@@ -46,10 +53,7 @@ export default function ChatPage() {
     socket.emit('joinChat', activeConvId);
 
     const handleMessage = (msg: Message) => {
-      qc.setQueryData(['messages', activeConvId], (old: Message[] | undefined) => {
-        if (!old) return [msg];
-        return [...old, msg];
-      });
+      qc.setQueryData(['messages', activeConvId], (old: Message[] | undefined) => mergeMessage(old, msg));
       // Also update conversation lastMessage
       qc.invalidateQueries({ queryKey: ['conversations'] });
       
@@ -76,7 +80,7 @@ export default function ChatPage() {
     onSuccess: (res) => {
       setNewMessage('');
       const sentMsg = res.data.data;
-      qc.setQueryData(['messages', activeConvId], (old: Message[] | undefined) => old ? [...old, sentMsg] : [sentMsg]);
+      qc.setQueryData(['messages', activeConvId], (old: Message[] | undefined) => mergeMessage(old, sentMsg));
       qc.invalidateQueries({ queryKey: ['conversations'] });
     }
   });

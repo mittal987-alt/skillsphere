@@ -1,5 +1,6 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
+import { getIO } from "../socket.js";
 
 // @desc Get All Conversations
 // @route GET /api/chat
@@ -120,6 +121,9 @@ export const sendMessage = async (req, res) => {
 
     const populatedMessage = await Message.findById(newMessage._id)
       .populate("sender", "name email avatar");
+
+    const io = req.app.get("io") || getIO();
+    io.to(conversationId).emit("newMessage", populatedMessage);
 
     res.status(201).json({
       success: true,
